@@ -1,21 +1,21 @@
 {
-  "testDate": "2026-10-12T09:31:42.965Z",
+  "testDate": "2026-10-12T09:52:26.647Z",
   "apiIntegrationTests": [
     {
       "testId": "TC-01",
       "description": "Amount: 500000, Budget: 1000000 -> Expected: AUTO_APPROVED",
       "postRequest": {
         "requester": "bob-tester-01",
-        "test_run_id": "BOB-VERIFY-TC-01-1791797502965",
+        "test_run_id": "BOB-VERIFY-TC-01-1791798746647",
         "amount": 500000,
         "budget": 1000000
       },
       "postResponse": {
         "status": 201,
         "body": {
-          "request_id": 7,
+          "request_id": 13,
           "requester": "bob-tester-01",
-          "test_run_id": "BOB-VERIFY-TC-01-1791797502965",
+          "test_run_id": "BOB-VERIFY-TC-01-1791798746647",
           "amount": 500000,
           "budget": 1000000,
           "status": "AUTO_APPROVED"
@@ -24,9 +24,9 @@
       "getResponse": {
         "status": 200,
         "body": {
-          "request_id": 7,
+          "request_id": 13,
           "requester": "bob-tester-01",
-          "test_run_id": "BOB-VERIFY-TC-01-1791797502965",
+          "test_run_id": "BOB-VERIFY-TC-01-1791798746647",
           "amount": 500000,
           "budget": 1000000,
           "status": "AUTO_APPROVED"
@@ -43,16 +43,16 @@
       "description": "Amount: 1500000, Budget: 2000000 -> Expected: PENDING_APPROVAL",
       "postRequest": {
         "requester": "bob-tester-02",
-        "test_run_id": "BOB-VERIFY-TC-02-1791797503702",
+        "test_run_id": "BOB-VERIFY-TC-02-1791798749768",
         "amount": 1500000,
         "budget": 2000000
       },
       "postResponse": {
         "status": 201,
         "body": {
-          "request_id": 8,
+          "request_id": 14,
           "requester": "bob-tester-02",
-          "test_run_id": "BOB-VERIFY-TC-02-1791797503702",
+          "test_run_id": "BOB-VERIFY-TC-02-1791798749768",
           "amount": 1500000,
           "budget": 2000000,
           "status": "PENDING_APPROVAL"
@@ -61,9 +61,9 @@
       "getResponse": {
         "status": 200,
         "body": {
-          "request_id": 8,
+          "request_id": 14,
           "requester": "bob-tester-02",
-          "test_run_id": "BOB-VERIFY-TC-02-1791797503702",
+          "test_run_id": "BOB-VERIFY-TC-02-1791798749768",
           "amount": 1500000,
           "budget": 2000000,
           "status": "PENDING_APPROVAL"
@@ -80,16 +80,16 @@
       "description": "Amount: 1200000, Budget: 1000000 -> Expected: REJECTED",
       "postRequest": {
         "requester": "bob-tester-03",
-        "test_run_id": "BOB-VERIFY-TC-03-1791797504227",
+        "test_run_id": "BOB-VERIFY-TC-03-1791798750307",
         "amount": 1200000,
         "budget": 1000000
       },
       "postResponse": {
         "status": 201,
         "body": {
-          "request_id": 9,
+          "request_id": 15,
           "requester": "bob-tester-03",
-          "test_run_id": "BOB-VERIFY-TC-03-1791797504227",
+          "test_run_id": "BOB-VERIFY-TC-03-1791798750307",
           "amount": 1200000,
           "budget": 1000000,
           "status": "REJECTED"
@@ -98,9 +98,9 @@
       "getResponse": {
         "status": 200,
         "body": {
-          "request_id": 9,
+          "request_id": 15,
           "requester": "bob-tester-03",
-          "test_run_id": "BOB-VERIFY-TC-03-1791797504227",
+          "test_run_id": "BOB-VERIFY-TC-03-1791798750307",
           "amount": 1200000,
           "budget": 1000000,
           "status": "REJECTED"
@@ -120,7 +120,7 @@
       "expectedStatus": 400,
       "actualStatus": 400,
       "responseBody": {
-        "timestamp": "2026-10-12T09:31:44.767Z",
+        "timestamp": "2026-10-12T09:52:30.853Z",
         "status": 400,
         "error": "Bad Request",
         "path": "/api/purchase-requests"
@@ -133,7 +133,7 @@
       "expectedStatus": 404,
       "actualStatus": 404,
       "responseBody": {
-        "timestamp": "2026-10-12T09:31:44.944Z",
+        "timestamp": "2026-10-12T09:52:31.040Z",
         "status": 404,
         "error": "Not Found",
         "path": "/api/purchase-requests/999999"
@@ -147,20 +147,20 @@
       "scenario": "TC-01",
       "expectedStatus": "AUTO_APPROVED",
       "badgeText": "AUTO_APPROVED (자동 승인)",
-      "autoRequestId": "10",
-      "autoRunId": "BOB-E2E-TC-01-1791797505867",
+      "autoRequestId": "16",
+      "autoRunId": "BOB-E2E-TC-01-1791798751989",
       "createdData": {
-        "request_id": 10,
+        "request_id": 16,
         "requester": "bob-tester-01",
-        "test_run_id": "BOB-E2E-TC-01-1791797505867",
+        "test_run_id": "BOB-E2E-TC-01-1791798751989",
         "amount": 500000,
         "budget": 1000000,
         "status": "AUTO_APPROVED"
       },
       "lookupData": {
-        "request_id": 10,
+        "request_id": 16,
         "requester": "bob-tester-01",
-        "test_run_id": "BOB-E2E-TC-01-1791797505867",
+        "test_run_id": "BOB-E2E-TC-01-1791798751989",
         "amount": 500000,
         "budget": 1000000,
         "status": "AUTO_APPROVED"
@@ -180,20 +180,20 @@
       "scenario": "TC-02",
       "expectedStatus": "PENDING_APPROVAL",
       "badgeText": "PENDING_APPROVAL (결재 대기)",
-      "autoRequestId": "11",
-      "autoRunId": "BOB-E2E-TC-02-1791797508503",
+      "autoRequestId": "17",
+      "autoRunId": "BOB-E2E-TC-02-1791798754612",
       "createdData": {
-        "request_id": 11,
+        "request_id": 17,
         "requester": "bob-tester-02",
-        "test_run_id": "BOB-E2E-TC-02-1791797508503",
+        "test_run_id": "BOB-E2E-TC-02-1791798754612",
         "amount": 1500000,
         "budget": 2000000,
         "status": "PENDING_APPROVAL"
       },
       "lookupData": {
-        "request_id": 11,
+        "request_id": 17,
         "requester": "bob-tester-02",
-        "test_run_id": "BOB-E2E-TC-02-1791797508503",
+        "test_run_id": "BOB-E2E-TC-02-1791798754612",
         "amount": 1500000,
         "budget": 2000000,
         "status": "PENDING_APPROVAL"
@@ -213,20 +213,20 @@
       "scenario": "TC-03",
       "expectedStatus": "REJECTED",
       "badgeText": "REJECTED (예산 초과 반려)",
-      "autoRequestId": "12",
-      "autoRunId": "BOB-E2E-TC-03-1791797510985",
+      "autoRequestId": "18",
+      "autoRunId": "BOB-E2E-TC-03-1791798757128",
       "createdData": {
-        "request_id": 12,
+        "request_id": 18,
         "requester": "bob-tester-03",
-        "test_run_id": "BOB-E2E-TC-03-1791797510985",
+        "test_run_id": "BOB-E2E-TC-03-1791798757128",
         "amount": 1200000,
         "budget": 1000000,
         "status": "REJECTED"
       },
       "lookupData": {
-        "request_id": 12,
+        "request_id": 18,
         "requester": "bob-tester-03",
-        "test_run_id": "BOB-E2E-TC-03-1791797510985",
+        "test_run_id": "BOB-E2E-TC-03-1791798757128",
         "amount": 1200000,
         "budget": 1000000,
         "status": "REJECTED"
@@ -255,7 +255,7 @@
       "testId": "E2E-NEG-02",
       "scenario": "존재하지 않는 Request ID 조회 시 ERROR 상태 배지 및 오류 알림 표시",
       "errorBadgeText": "ERROR",
-      "errorNotification": "API Error:\n        {\"timestamp\":\"2026-10-12T09:31:54.360Z\",\"status\":404,\"error\":\"Not Found\",\"path\":\"/api/purchase-requests/999999\"}",
+      "errorNotification": "API Error:\n        {\"timestamp\":\"2026-10-12T09:52:40.446Z\",\"status\":404,\"error\":\"Not Found\",\"path\":\"/api/purchase-requests/999999\"}",
       "result": "PASS",
       "screenshots": [
         "docs/screenshots/e2e-verification/NEG_02_404_error_display.png"
