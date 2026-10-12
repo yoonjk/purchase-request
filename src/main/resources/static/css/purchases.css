@@ -1,0 +1,625 @@
+/* ==========================================================================
+   IBM Carbon Design System Tokens & Base Styles (v11)
+   ========================================================================== */
+:root {
+  /* Colors - White / Gray 10 Theme */
+  --cds-background: #f4f4f4;
+  --cds-layer-01: #ffffff;
+  --cds-layer-02: #f4f4f4;
+  --cds-layer-hover: #e8e8e8;
+  --cds-text-primary: #161616;
+  --cds-text-secondary: #525252;
+  --cds-text-placeholder: #a8a8a8;
+  --cds-text-on-color: #ffffff;
+  --cds-text-error: #da1e28;
+  
+  --cds-link-primary: #0f62fe;
+  --cds-interactive: #0f62fe;
+  --cds-interactive-hover: #0353e9;
+  --cds-interactive-active: #002d9c;
+  --cds-interactive-disabled: #c6c6c6;
+
+  --cds-border-subtle: #e0e0e0;
+  --cds-border-strong: #8d8d8d;
+  --cds-border-interactive: #0f62fe;
+
+  /* Status Colors */
+  --cds-support-success: #24a148;
+  --cds-support-success-bg: #defbe6;
+  --cds-support-success-text: #0e6027;
+
+  --cds-support-warning: #f1c21b;
+  --cds-support-warning-bg: #fef3d6;
+  --cds-support-warning-text: #8a6d00;
+
+  --cds-support-error: #da1e28;
+  --cds-support-error-bg: #fff1f1;
+  --cds-support-error-text: #bc121e;
+
+  --cds-support-info: #0f62fe;
+  --cds-support-info-bg: #edf5ff;
+  --cds-support-info-text: #0043ce;
+
+  /* Typography & Spacing */
+  --cds-font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --cds-font-mono: 'IBM Plex Mono', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  --cds-spacing-01: 2px;
+  --cds-spacing-02: 4px;
+  --cds-spacing-03: 8px;
+  --cds-spacing-04: 12px;
+  --cds-spacing-05: 16px;
+  --cds-spacing-06: 24px;
+  --cds-spacing-07: 32px;
+  --cds-spacing-08: 40px;
+  --cds-spacing-09: 48px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--cds-font-family);
+  font-size: 14px;
+  line-height: 1.42857;
+  color: var(--cds-text-primary);
+  background-color: var(--cds-background);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ==========================================================================
+   Header / Shell
+   ========================================================================== */
+.cds--header {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  background-color: #161616;
+  border-bottom: 1px solid #393939;
+  padding: 0 var(--cds-spacing-05);
+  color: #ffffff;
+  position: sticky;
+  top: 0;
+  z-index: 9000;
+}
+
+.cds--header__name {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.1px;
+  text-decoration: none;
+  color: #ffffff;
+  height: 100%;
+}
+
+.cds--header__name-prefix {
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.cds--header__divider {
+  height: 18px;
+  width: 1px;
+  background-color: #525252;
+  margin: 0 var(--cds-spacing-04);
+}
+
+.cds--header__badge {
+  font-size: 12px;
+  background: #393939;
+  color: #c6c6c6;
+  padding: 2px 6px;
+  border-radius: 2px;
+}
+
+/* ==========================================================================
+   Layout & Container
+   ========================================================================== */
+.cds--main-content {
+  flex: 1;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--cds-spacing-06) var(--cds-spacing-05) var(--cds-spacing-09);
+}
+
+.cds--page-header {
+  margin-bottom: var(--cds-spacing-06);
+}
+
+.cds--page-header__title {
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--cds-text-primary);
+  margin-bottom: var(--cds-spacing-02);
+}
+
+.cds--page-header__description {
+  font-size: 14px;
+  color: var(--cds-text-secondary);
+}
+
+/* Grid layout */
+.cds--grid-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--cds-spacing-06);
+  margin-bottom: var(--cds-spacing-06);
+}
+
+@media (max-width: 800px) {
+  .cds--grid-container {
+    grid-template-columns: 1fr;
+  }
+  .cds--main-content {
+    padding: var(--cds-spacing-05) var(--cds-spacing-04);
+  }
+}
+
+/* ==========================================================================
+   Carbon Card / Tile
+   ========================================================================== */
+.cds--tile {
+  background-color: var(--cds-layer-01);
+  border: 1px solid var(--cds-border-subtle);
+  padding: var(--cds-spacing-06);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.cds--tile__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--cds-spacing-05);
+  padding-bottom: var(--cds-spacing-04);
+  border-bottom: 1px solid var(--cds-border-subtle);
+}
+
+.cds--tile__title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--cds-text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--cds-spacing-03);
+}
+
+.cds--tile__subtitle {
+  font-size: 12px;
+  color: var(--cds-text-secondary);
+}
+
+/* Business Rules Callout Box */
+.cds--callout {
+  background-color: var(--cds-layer-02);
+  border-left: 3px solid var(--cds-interactive);
+  padding: var(--cds-spacing-04);
+  margin-bottom: var(--cds-spacing-05);
+  font-size: 12px;
+  color: var(--cds-text-secondary);
+  line-height: 1.5;
+}
+
+.cds--callout__title {
+  font-weight: 600;
+  color: var(--cds-text-primary);
+  margin-bottom: 2px;
+}
+
+/* ==========================================================================
+   Carbon Form Elements
+   ========================================================================== */
+.cds--form-item {
+  margin-bottom: var(--cds-spacing-05);
+  display: flex;
+  flex-direction: column;
+}
+
+.cds--label {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--cds-text-secondary);
+  margin-bottom: var(--cds-spacing-02);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cds--label-required {
+  color: var(--cds-text-primary);
+}
+
+.cds--text-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.cds--text-input {
+  width: 100%;
+  height: 40px;
+  padding: 0 var(--cds-spacing-05);
+  font-family: var(--cds-font-family);
+  font-size: 14px;
+  color: var(--cds-text-primary);
+  background-color: var(--cds-layer-02);
+  border: none;
+  border-bottom: 1px solid var(--cds-border-strong);
+  border-radius: 0;
+  outline: 2px solid transparent;
+  outline-offset: -2px;
+  transition: background-color 70ms cubic-bezier(0, 0, 0.38, 0.9), outline 70ms cubic-bezier(0, 0, 0.38, 0.9);
+}
+
+.cds--text-input:focus {
+  outline: 2px solid var(--cds-border-interactive);
+  background-color: var(--cds-layer-01);
+}
+
+.cds--text-input::placeholder {
+  color: var(--cds-text-placeholder);
+}
+
+.cds--text-input.cds--text-input--invalid {
+  border-bottom: 2px solid var(--cds-support-error);
+  padding-right: 36px;
+}
+
+/* Ghost Action Button inside Input */
+.cds--btn--ghost-icon {
+  background: transparent;
+  border: none;
+  color: var(--cds-link-primary);
+  cursor: pointer;
+  font-size: 12px;
+  font-family: var(--cds-font-family);
+  padding: 2px 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-decoration: underline;
+}
+
+.cds--btn--ghost-icon:hover {
+  color: var(--cds-interactive-hover);
+}
+
+.cds--form__helper-text {
+  font-size: 12px;
+  color: var(--cds-text-secondary);
+  margin-top: 4px;
+}
+
+.cds--form__error-text {
+  font-size: 12px;
+  color: var(--cds-text-error);
+  margin-top: 4px;
+  display: none;
+}
+
+.cds--form__error-text.cds--visible {
+  display: block;
+}
+
+/* ==========================================================================
+   Carbon Button
+   ========================================================================== */
+.cds--btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+  padding: var(--cds-spacing-04) var(--cds-spacing-06);
+  font-family: var(--cds-font-family);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background-color 70ms cubic-bezier(0, 0, 0.38, 0.9);
+  width: 100%;
+  margin-top: var(--cds-spacing-03);
+}
+
+.cds--btn--primary {
+  background-color: var(--cds-interactive);
+  color: var(--cds-text-on-color);
+}
+
+.cds--btn--primary:hover:not(:disabled) {
+  background-color: var(--cds-interactive-hover);
+}
+
+.cds--btn--primary:active:not(:disabled) {
+  background-color: var(--cds-interactive-active);
+}
+
+.cds--btn--secondary {
+  background-color: #393939;
+  color: #ffffff;
+}
+
+.cds--btn--secondary:hover:not(:disabled) {
+  background-color: #4c4c4c;
+}
+
+.cds--btn:disabled {
+  background-color: var(--cds-interactive-disabled);
+  color: #8d8d8d;
+  cursor: not-allowed;
+  border-color: transparent;
+}
+
+/* ==========================================================================
+   Carbon Notification
+   ========================================================================== */
+.cds--inline-notification {
+  display: none;
+  align-items: flex-start;
+  min-height: 48px;
+  padding: var(--cds-spacing-04) var(--cds-spacing-05);
+  margin-bottom: var(--cds-spacing-05);
+  border-left: 3px solid transparent;
+  font-size: 14px;
+  line-height: 1.4;
+  animation: cdsFadeIn 150ms cubic-bezier(0, 0, 0.38, 0.9);
+}
+
+.cds--inline-notification.cds--visible {
+  display: flex;
+}
+
+.cds--inline-notification--info {
+  background-color: var(--cds-support-info-bg);
+  border-left-color: var(--cds-support-info);
+  color: var(--cds-support-info-text);
+}
+
+.cds--inline-notification--success {
+  background-color: var(--cds-support-success-bg);
+  border-left-color: var(--cds-support-success);
+  color: var(--cds-support-success-text);
+}
+
+.cds--inline-notification--error {
+  background-color: var(--cds-support-error-bg);
+  border-left-color: var(--cds-support-error);
+  color: var(--cds-support-error-text);
+}
+
+.cds--inline-notification__icon {
+  margin-right: var(--cds-spacing-04);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.cds--inline-notification__content {
+  flex: 1;
+}
+
+.cds--inline-notification__title {
+  font-weight: 600;
+  margin-right: var(--cds-spacing-02);
+}
+
+/* ==========================================================================
+   Carbon Tag / Status Badge
+   ========================================================================== */
+.cds--tag {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 var(--cds-spacing-03);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.16px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  gap: 6px;
+}
+
+.cds--tag--green {
+  background-color: var(--cds-support-success-bg);
+  color: var(--cds-support-success-text);
+  border: 1px solid #a7f0ba;
+}
+
+.cds--tag--blue {
+  background-color: var(--cds-support-info-bg);
+  color: var(--cds-support-info-text);
+  border: 1px solid #bae0ff;
+}
+
+.cds--tag--red {
+  background-color: var(--cds-support-error-bg);
+  color: var(--cds-support-error-text);
+  border: 1px solid #ffd7d9;
+}
+
+.cds--tag--gray {
+  background-color: #e0e0e0;
+  color: #393939;
+  border: 1px solid #c6c6c6;
+}
+
+.cds--tag__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+/* ==========================================================================
+   Result Section & Details Table
+   ========================================================================== */
+.cds--result-section {
+  background-color: var(--cds-layer-01);
+  border: 1px solid var(--cds-border-subtle);
+  padding: var(--cds-spacing-06);
+}
+
+.cds--result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--cds-spacing-05);
+  padding-bottom: var(--cds-spacing-04);
+  border-bottom: 1px solid var(--cds-border-subtle);
+  flex-wrap: wrap;
+  gap: var(--cds-spacing-03);
+}
+
+.cds--result-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--cds-text-primary);
+}
+
+.cds--data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--cds-spacing-05);
+  font-size: 13px;
+}
+
+.cds--data-table th,
+.cds--data-table td {
+  padding: var(--cds-spacing-04);
+  text-align: left;
+  border-bottom: 1px solid var(--cds-border-subtle);
+}
+
+.cds--data-table th {
+  background-color: var(--cds-layer-02);
+  font-weight: 600;
+  color: var(--cds-text-secondary);
+  width: 30%;
+}
+
+.cds--data-table td {
+  color: var(--cds-text-primary);
+  font-weight: 500;
+}
+
+.cds--json-container {
+  margin-top: var(--cds-spacing-04);
+}
+
+.cds--json-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--cds-spacing-02);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--cds-text-secondary);
+}
+
+/* Essential <pre id="result"> */
+pre#result {
+  background-color: #161616;
+  color: #f4f4f4;
+  font-family: var(--cds-font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  padding: var(--cds-spacing-05);
+  overflow-x: auto;
+  border: 1px solid #393939;
+  min-height: 60px;
+  max-height: 280px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* ==========================================================================
+   Loading Spinner
+   ========================================================================== */
+.cds--spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #ffffff;
+  animation: cdsSpin 0.8s linear infinite;
+  margin-left: 8px;
+}
+
+.cds--btn--secondary .cds--spinner {
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+}
+
+@keyframes cdsSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes cdsFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Footer */
+.cds--footer {
+  text-align: center;
+  padding: var(--cds-spacing-06);
+  font-size: 12px;
+  color: var(--cds-text-secondary);
+  border-top: 1px solid var(--cds-border-subtle);
+  background-color: var(--cds-layer-01);
+  margin-top: auto;
+}
+
+/* Purchase Approval Result */
+.approval-result {
+  margin-top: 24px;
+  padding: 20px;
+  background: #f4f4f4;
+  border-left: 4px solid #0f62fe;
+}
+
+.approval-result h3 {
+  margin: 0 0 16px;
+  font-size: 18px;
+}
+
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid #c6c6c6;
+}
+
+.result-row:last-child {
+  border-bottom: none;
+}
+
+#approvalStatus {
+  font-weight: 600;
+}
+
+#approvalStatus[data-status="AUTO_APPROVED"] {
+  color: #198038;
+}
+
+#approvalStatus[data-status="PENDING_APPROVAL"] {
+  color: #b28600;
+}
+
+#approvalStatus[data-status="REJECTED"] {
+  color: #da1e28;
+}

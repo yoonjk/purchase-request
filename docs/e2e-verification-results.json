@@ -1,0 +1,268 @@
+{
+  "testDate": "2026-10-12T09:31:42.965Z",
+  "apiIntegrationTests": [
+    {
+      "testId": "TC-01",
+      "description": "Amount: 500000, Budget: 1000000 -> Expected: AUTO_APPROVED",
+      "postRequest": {
+        "requester": "bob-tester-01",
+        "test_run_id": "BOB-VERIFY-TC-01-1791797502965",
+        "amount": 500000,
+        "budget": 1000000
+      },
+      "postResponse": {
+        "status": 201,
+        "body": {
+          "request_id": 7,
+          "requester": "bob-tester-01",
+          "test_run_id": "BOB-VERIFY-TC-01-1791797502965",
+          "amount": 500000,
+          "budget": 1000000,
+          "status": "AUTO_APPROVED"
+        }
+      },
+      "getResponse": {
+        "status": 200,
+        "body": {
+          "request_id": 7,
+          "requester": "bob-tester-01",
+          "test_run_id": "BOB-VERIFY-TC-01-1791797502965",
+          "amount": 500000,
+          "budget": 1000000,
+          "status": "AUTO_APPROVED"
+        }
+      },
+      "expectedStatus": "AUTO_APPROVED",
+      "actualStatus": "AUTO_APPROVED",
+      "statusMatch": true,
+      "dataMatch": true,
+      "result": "PASS"
+    },
+    {
+      "testId": "TC-02",
+      "description": "Amount: 1500000, Budget: 2000000 -> Expected: PENDING_APPROVAL",
+      "postRequest": {
+        "requester": "bob-tester-02",
+        "test_run_id": "BOB-VERIFY-TC-02-1791797503702",
+        "amount": 1500000,
+        "budget": 2000000
+      },
+      "postResponse": {
+        "status": 201,
+        "body": {
+          "request_id": 8,
+          "requester": "bob-tester-02",
+          "test_run_id": "BOB-VERIFY-TC-02-1791797503702",
+          "amount": 1500000,
+          "budget": 2000000,
+          "status": "PENDING_APPROVAL"
+        }
+      },
+      "getResponse": {
+        "status": 200,
+        "body": {
+          "request_id": 8,
+          "requester": "bob-tester-02",
+          "test_run_id": "BOB-VERIFY-TC-02-1791797503702",
+          "amount": 1500000,
+          "budget": 2000000,
+          "status": "PENDING_APPROVAL"
+        }
+      },
+      "expectedStatus": "PENDING_APPROVAL",
+      "actualStatus": "PENDING_APPROVAL",
+      "statusMatch": true,
+      "dataMatch": true,
+      "result": "PASS"
+    },
+    {
+      "testId": "TC-03",
+      "description": "Amount: 1200000, Budget: 1000000 -> Expected: REJECTED",
+      "postRequest": {
+        "requester": "bob-tester-03",
+        "test_run_id": "BOB-VERIFY-TC-03-1791797504227",
+        "amount": 1200000,
+        "budget": 1000000
+      },
+      "postResponse": {
+        "status": 201,
+        "body": {
+          "request_id": 9,
+          "requester": "bob-tester-03",
+          "test_run_id": "BOB-VERIFY-TC-03-1791797504227",
+          "amount": 1200000,
+          "budget": 1000000,
+          "status": "REJECTED"
+        }
+      },
+      "getResponse": {
+        "status": 200,
+        "body": {
+          "request_id": 9,
+          "requester": "bob-tester-03",
+          "test_run_id": "BOB-VERIFY-TC-03-1791797504227",
+          "amount": 1200000,
+          "budget": 1000000,
+          "status": "REJECTED"
+        }
+      },
+      "expectedStatus": "REJECTED",
+      "actualStatus": "REJECTED",
+      "statusMatch": true,
+      "dataMatch": true,
+      "result": "PASS"
+    }
+  ],
+  "negativeTests": [
+    {
+      "testId": "NEG-01",
+      "name": "잘못된 Test Run ID (특수문자 포함)",
+      "expectedStatus": 400,
+      "actualStatus": 400,
+      "responseBody": {
+        "timestamp": "2026-10-12T09:31:44.767Z",
+        "status": 400,
+        "error": "Bad Request",
+        "path": "/api/purchase-requests"
+      },
+      "result": "PASS"
+    },
+    {
+      "testId": "NEG-02",
+      "name": "존재하지 않는 Request ID 조회",
+      "expectedStatus": 404,
+      "actualStatus": 404,
+      "responseBody": {
+        "timestamp": "2026-10-12T09:31:44.944Z",
+        "status": 404,
+        "error": "Not Found",
+        "path": "/api/purchase-requests/999999"
+      },
+      "result": "PASS"
+    }
+  ],
+  "browserE2ETests": [
+    {
+      "testId": "E2E-TC-01",
+      "scenario": "TC-01",
+      "expectedStatus": "AUTO_APPROVED",
+      "badgeText": "AUTO_APPROVED (자동 승인)",
+      "autoRequestId": "10",
+      "autoRunId": "BOB-E2E-TC-01-1791797505867",
+      "createdData": {
+        "request_id": 10,
+        "requester": "bob-tester-01",
+        "test_run_id": "BOB-E2E-TC-01-1791797505867",
+        "amount": 500000,
+        "budget": 1000000,
+        "status": "AUTO_APPROVED"
+      },
+      "lookupData": {
+        "request_id": 10,
+        "requester": "bob-tester-01",
+        "test_run_id": "BOB-E2E-TC-01-1791797505867",
+        "amount": 500000,
+        "budget": 1000000,
+        "status": "AUTO_APPROVED"
+      },
+      "isBadgeMatch": true,
+      "isSyncMatch": true,
+      "isLookupMatch": true,
+      "result": "PASS",
+      "screenshots": [
+        "docs/screenshots/e2e-verification/TC-01_01_before_submit.png",
+        "docs/screenshots/e2e-verification/TC-01_02_created.png",
+        "docs/screenshots/e2e-verification/TC-01_03_looked_up.png"
+      ]
+    },
+    {
+      "testId": "E2E-TC-02",
+      "scenario": "TC-02",
+      "expectedStatus": "PENDING_APPROVAL",
+      "badgeText": "PENDING_APPROVAL (결재 대기)",
+      "autoRequestId": "11",
+      "autoRunId": "BOB-E2E-TC-02-1791797508503",
+      "createdData": {
+        "request_id": 11,
+        "requester": "bob-tester-02",
+        "test_run_id": "BOB-E2E-TC-02-1791797508503",
+        "amount": 1500000,
+        "budget": 2000000,
+        "status": "PENDING_APPROVAL"
+      },
+      "lookupData": {
+        "request_id": 11,
+        "requester": "bob-tester-02",
+        "test_run_id": "BOB-E2E-TC-02-1791797508503",
+        "amount": 1500000,
+        "budget": 2000000,
+        "status": "PENDING_APPROVAL"
+      },
+      "isBadgeMatch": true,
+      "isSyncMatch": true,
+      "isLookupMatch": true,
+      "result": "PASS",
+      "screenshots": [
+        "docs/screenshots/e2e-verification/TC-02_01_before_submit.png",
+        "docs/screenshots/e2e-verification/TC-02_02_created.png",
+        "docs/screenshots/e2e-verification/TC-02_03_looked_up.png"
+      ]
+    },
+    {
+      "testId": "E2E-TC-03",
+      "scenario": "TC-03",
+      "expectedStatus": "REJECTED",
+      "badgeText": "REJECTED (예산 초과 반려)",
+      "autoRequestId": "12",
+      "autoRunId": "BOB-E2E-TC-03-1791797510985",
+      "createdData": {
+        "request_id": 12,
+        "requester": "bob-tester-03",
+        "test_run_id": "BOB-E2E-TC-03-1791797510985",
+        "amount": 1200000,
+        "budget": 1000000,
+        "status": "REJECTED"
+      },
+      "lookupData": {
+        "request_id": 12,
+        "requester": "bob-tester-03",
+        "test_run_id": "BOB-E2E-TC-03-1791797510985",
+        "amount": 1200000,
+        "budget": 1000000,
+        "status": "REJECTED"
+      },
+      "isBadgeMatch": true,
+      "isSyncMatch": true,
+      "isLookupMatch": true,
+      "result": "PASS",
+      "screenshots": [
+        "docs/screenshots/e2e-verification/TC-03_01_before_submit.png",
+        "docs/screenshots/e2e-verification/TC-03_02_created.png",
+        "docs/screenshots/e2e-verification/TC-03_03_looked_up.png"
+      ]
+    },
+    {
+      "testId": "E2E-NEG-01",
+      "scenario": "클라이언트 유효성 검사 (Requester 누락 시 인라인 에러 및 제출 차단)",
+      "requesterErrorVisible": true,
+      "notificationText": "Validation Error:\n        필수 입력 항목과 입력값을 확인해주세요.",
+      "result": "PASS",
+      "screenshots": [
+        "docs/screenshots/e2e-verification/NEG_01_client_validation.png"
+      ]
+    },
+    {
+      "testId": "E2E-NEG-02",
+      "scenario": "존재하지 않는 Request ID 조회 시 ERROR 상태 배지 및 오류 알림 표시",
+      "errorBadgeText": "ERROR",
+      "errorNotification": "API Error:\n        {\"timestamp\":\"2026-10-12T09:31:54.360Z\",\"status\":404,\"error\":\"Not Found\",\"path\":\"/api/purchase-requests/999999\"}",
+      "result": "PASS",
+      "screenshots": [
+        "docs/screenshots/e2e-verification/NEG_02_404_error_display.png"
+      ]
+    }
+  ],
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 404 ()"
+  ]
+}

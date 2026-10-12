@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IBM Carbon - Purchase Approval System</title>
+  <!-- Local CSS (IBM Carbon Design System v11) -->
+  <link rel="stylesheet" href="/css/purchases.css" th:href="@{/css/purchases.css}">
+</head>
+
+<body>
+
+  <!-- Carbon UI Shell Header -->
+  <header class="cds--header">
+    <a href="#" class="cds--header__name">
+      <span class="cds--header__name-prefix">IBM</span> Purchase Approval System
+    </a>
+    <div class="cds--header__divider"></div>
+    <span class="cds--header__badge">Carbon Design v11</span>
+  </header>
+
+  <!-- Main Content -->
+  <main class="cds--main-content">
+    <div class="cds--page-header">
+      <h1 class="cds--page-header__title">Purchase Approval Management</h1>
+      <p class="cds--page-header__description">
+        IBM Bob Hands-on Lab • 테스트 데이터 자동 추적 및 구매 품의 승인 처리 콘솔
+      </p>
+    </div>
+
+    <!-- Notification Alert Bar -->
+    <div id="statusNotification" class="cds--inline-notification" role="status" aria-live="polite">
+      <div class="cds--inline-notification__icon" id="notificationIcon"></div>
+      <div class="cds--inline-notification__content">
+        <strong class="cds--inline-notification__title" id="notificationTitle">Status:</strong>
+        <span id="notificationMessage">Message goes here</span>
+      </div>
+    </div>
+
+    <!-- 2-Column Responsive Grid -->
+    <div class="cds--grid-container">
+
+      <!-- Card 1: Create Request -->
+      <section class="cds--tile">
+        <div class="cds--tile__header">
+          <div>
+            <h2 class="cds--tile__title">Create Purchase Request</h2>
+            <p class="cds--tile__subtitle">새로운 구매 품의 요청 등록 (직접 입력)</p>
+          </div>
+        </div>
+
+        <div class="cds--callout">
+          <div class="cds--callout__title">💡 승인 판정 기준 안내</div>
+          • 요청금액 ≤ ₩1,000,000 및 예산 내: <strong>AUTO_APPROVED (자동 승인)</strong><br>
+          • 요청금액 &gt; ₩1,000,000 및 예산 내: <strong>PENDING_APPROVAL (결재 대기)</strong><br>
+          • 요청금액 &gt; 가용예산: <strong>REJECTED (예산 초과 반려)</strong>
+        </div>
+
+        <form id="create" novalidate>
+          <!-- Requester -->
+          <div class="cds--form-item">
+            <label class="cds--label" for="createRequester">
+              <span>Requester (요청자) <span class="cds--label-required">*</span></span>
+            </label>
+            <div class="cds--text-input-wrapper">
+              <input id="createRequester" class="cds--text-input" name="requester" placeholder="예: bob-tester 또는 홍길동" required>
+            </div>
+            <div id="error-requester" class="cds--form__error-text">요청자 이름을 입력해주세요.</div>
+          </div>
+
+          <!-- Test Run ID (자동 생성 및 사용자 수정 가능) -->
+          <div class="cds--form-item">
+            <label class="cds--label" for="createTestRunId">
+              <span>Test run ID (테스트 실행 ID) <span class="cds--label-required">*</span></span>
+              <button type="button" id="btnRegenerateRunId" class="cds--btn--ghost-icon" title="새로운 고유 Test Run ID 자동 생성">↻ 새 ID 생성</button>
+            </label>
+            <div class="cds--text-input-wrapper">
+              <input id="createTestRunId" class="cds--text-input" name="test_run_id" placeholder="실행 고유 ID (자동 생성됨, 수정 가능)" required>
+            </div>
+            <div class="cds--form__helper-text">테스트 실행마다 고유 ID가 자동 생성되며, 필요 시 직접 수정할 수 있습니다 (최대 64자).</div>
+            <div id="error-test_run_id" class="cds--form__error-text">유효한 Test run ID를 입력해주세요 (1~64자 영숫자/하이픈/언더스코어).</div>
+          </div>
+
+          <!-- Amount -->
+          <div class="cds--form-item">
+            <label class="cds--label" for="createAmount">
+              <span>Amount (요청 금액, 원) <span class="cds--label-required">*</span></span>
+            </label>
+            <div class="cds--text-input-wrapper">
+              <input id="createAmount" class="cds--text-input" name="amount" type="number" min="1" step="1" placeholder="예: 500000" required>
+            </div>
+            <div id="error-amount" class="cds--form__error-text">요청 금액은 1원 이상이어야 합니다.</div>
+          </div>
+
+          <!-- Budget -->
+          <div class="cds--form-item">
+            <label class="cds--label" for="createBudget">
+              <span>Budget (가용 예산, 원) <span class="cds--label-required">*</span></span>
+            </label>
+            <div class="cds--text-input-wrapper">
+              <input id="createBudget" class="cds--text-input" name="budget" type="number" min="0" step="1" placeholder="예: 1000000" required>
+            </div>
+            <div id="error-budget" class="cds--form__error-text">예산은 0원 이상이어야 합니다.</div>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" id="createBtn" class="cds--btn cds--btn--primary">
+            <span id="createBtnText">Create request</span>
+            <span id="createSpinner" class="cds--spinner" style="display: none;"></span>
+          </button>
+        </form>
+      </section>
+
+      <!-- Card 2: Lookup Request -->
+      <section class="cds--tile">
+        <div class="cds--tile__header">
+          <div>
+            <h2 class="cds--tile__title">Lookup Purchase Request</h2>
+            <p class="cds--tile__subtitle">요청 고유번호 및 실행 ID로 조회</p>
+          </div>
+        </div>
+
+        <div class="cds--callout">
+          <div class="cds--callout__title">🔄 자동 추적 연동</div>
+          구매 요청 생성 성공 시 <strong>Request ID</strong>와 <strong>Test run ID</strong>가 아래 조회 필드에 자동으로 채워집니다.
+        </div>
+
+        <div>
+          <!-- Request ID -->
+          <div class="cds--form-item">
+            <label class="cds--label" for="requestId">
+              <span>Request ID (요청 고유번호) <span class="cds--label-required">*</span></span>
+            </label>
+            <div class="cds--text-input-wrapper">
+              <input id="requestId" class="cds--text-input" name="requestId" type="number" min="1" placeholder="생성 시 자동 입력 또는 직접 입력" required>
+            </div>
+            <div id="error-requestId" class="cds--form__error-text">유효한 Request ID (양의 정수)를 입력해주세요.</div>
+          </div>
+
+          <!-- Lookup Run ID -->
+          <div class="cds--form-item">
+            <label class="cds--label" for="lookupRun">
+              <span>Test run ID (테스트 실행 ID) <span class="cds--label-required">*</span></span>
+            </label>
+            <div class="cds--text-input-wrapper">
+              <input id="lookupRun" class="cds--text-input" name="lookupRun" placeholder="생성에 사용된 Test Run ID (자동 동기화)" required>
+            </div>
+            <div id="error-lookupRun" class="cds--form__error-text">Test run ID를 입력해주세요.</div>
+          </div>
+
+          <!-- Lookup Button -->
+          <button type="button" id="lookup" class="cds--btn cds--btn--secondary">
+            <span id="lookupBtnText">Find request</span>
+            <span id="lookupSpinner" class="cds--spinner" style="display: none;"></span>
+          </button>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Card 3: Result & Status Section -->
+    <section class="cds--result-section">
+      <div class="cds--result-header">
+        <h2 class="cds--result-title">Response & Approval Status</h2>
+        <div id="statusBadgeContainer">
+          <span class="cds--tag cds--tag--gray">
+            <span class="cds--tag__dot"></span>
+            <span id="statusBadgeText">READY</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Formatted Summary Table -->
+      <div id="summaryTableContainer" style="display: none;">
+        <table class="cds--data-table" aria-label="요청 세부 정보 요약">
+          <tbody>
+            <tr>
+              <th>Request ID</th>
+              <td id="res-id">-</td>
+            </tr>
+            <tr>
+              <th>Requester</th>
+              <td id="res-requester">-</td>
+            </tr>
+            <tr>
+              <th>Test Run ID</th>
+              <td id="res-run">-</td>
+            </tr>
+            <tr>
+              <th>Amount / Budget</th>
+              <td id="res-amounts">-</td>
+            </tr>
+            <tr>
+              <th>Approval Status</th>
+              <td id="res-status">-</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Raw JSON Response Box -->
+      <div class="cds--json-container">
+        <div class="cds--json-header">
+          <span>RAW JSON PAYLOAD</span>
+          <span id="jsonTimestamp" style="font-weight: 400; color: #8d8d8d;"></span>
+        </div>
+        <pre id="result" aria-live="polite">Waiting for request or lookup...</pre>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="cds--footer">
+    IBM Carbon Design System for Purchase Request Services • Dynamic Test Run Edition
+  </footer>
+
+  <!-- Local Script -->
+  <script src="/js/purchases.js" th:src="@{/js/purchases.js}"></script>
+</body>
+</html>

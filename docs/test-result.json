@@ -1,0 +1,64 @@
+{
+  "testDate": "2026-10-12T08:42:55.542Z",
+  "steps": [
+    {
+      "step": 1,
+      "name": "구매 승인 화면 접속",
+      "status": "PASS",
+      "screenshot": "docs/screenshots/01_initial_screen.png"
+    },
+    {
+      "step": 2,
+      "name": "Test run ID 자동 생성 확인",
+      "status": "PASS",
+      "value": "BOB-RUN-20261012-174255-5U52"
+    },
+    {
+      "step": 3,
+      "name": "입력값 설정 (Requester: bob-ui-tester, Amount: 500000, Budget: 1000000)",
+      "status": "PASS",
+      "screenshot": "docs/screenshots/02_form_filled.png"
+    },
+    {
+      "step": 5,
+      "name": "생성 결과 승인 상태 AUTO_APPROVED 검증",
+      "status": "PASS",
+      "expected": "AUTO_APPROVED",
+      "actual": "AUTO_APPROVED",
+      "screenshot": "docs/screenshots/03_create_success.png"
+    },
+    {
+      "step": 6,
+      "name": "Request ID 및 Test run ID 조회 필드 자동 연동 검증",
+      "status": "PASS",
+      "requestId": "5",
+      "testRunId": "BOB-RUN-20261012-174255-5U52"
+    },
+    {
+      "step": 8,
+      "name": "생성 결과와 조회 결과 데이터 정합성 검증 (Request ID, Test Run ID, Requester, Amount, Budget, Status)",
+      "status": "PASS",
+      "screenshot": "docs/screenshots/04_lookup_success.png"
+    }
+  ],
+  "success": true,
+  "data": {
+    "initialTestRunId": "BOB-RUN-20261012-174255-5U52",
+    "created": {
+      "request_id": 5,
+      "requester": "bob-ui-tester",
+      "test_run_id": "BOB-RUN-20261012-174255-5U52",
+      "amount": 500000,
+      "budget": 1000000,
+      "status": "AUTO_APPROVED"
+    },
+    "lookup": {
+      "request_id": 5,
+      "requester": "bob-ui-tester",
+      "test_run_id": "BOB-RUN-20261012-174255-5U52",
+      "amount": 500000,
+      "budget": 1000000,
+      "status": "AUTO_APPROVED"
+    }
+  }
+}

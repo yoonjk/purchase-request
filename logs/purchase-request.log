@@ -1,0 +1,10 @@
+2026-10-12T18:45:31.560+09:00  INFO 43067 --- [main] c.d.purchase.PurchaseRequestApplication  : Starting PurchaseRequestApplication using Java 25.0.4.1 with PID 43067 (/Users/nexweb/project/works/bootcamp/purchase-request/target/classes started by nexweb in /Users/nexweb/project/works/bootcamp/purchase-request)
+2026-10-12T18:45:31.561+09:00  INFO 43067 --- [main] c.d.purchase.PurchaseRequestApplication  : No active profile set, falling back to 1 default profile: "default"
+2026-10-12T18:45:31.932+09:00  INFO 43067 --- [main] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8080 (http)
+2026-10-12T18:45:31.936+09:00  INFO 43067 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-10-12T18:45:31.936+09:00  INFO 43067 --- [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.24]
+2026-10-12T18:45:31.950+09:00  INFO 43067 --- [main] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 372 ms
+2026-10-12T18:45:32.219+09:00  INFO 43067 --- [main] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8080 (http) with context path '/'
+2026-10-12T18:45:32.222+09:00  INFO 43067 --- [main] c.d.purchase.PurchaseRequestApplication  : Started PurchaseRequestApplication in 0.814 seconds (process running for 0.942)
+2026-10-12T18:45:32.223+09:00  WARN 43067 --- [main] o.s.core.events.SpringDocAppInitializer  : SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+2026-10-12T18:45:32.223+09:00  WARN 43067 --- [main] o.s.core.events.SpringDocAppInitializer  : SpringDoc /swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
