@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.purchase.dao.TestResultMapper">
+
+ <sql id="runColumns">run_id AS runId, execution_id AS executionId, application_id AS applicationId,
+  module, framework, test_type AS testType, started_at AS startedAt, finished_at AS finishedAt,
+  duration_ms AS durationMs, total_count AS totalCount, passed_count AS passedCount,
+  failed_count AS failedCount, skipped_count AS skippedCount,
+  execution_status AS executionStatus, created_at AS createdAt</sql>
+
+ <select id="lastInsertId" resultType="long">SELECT LAST_INSERT_ID()</select>
+
+ <select id="findRunByExecutionId" resultType="map">SELECT <include refid="runColumns"/>, content_hash AS contentHash
+  FROM modernization_test_run WHERE execution_id=#{executionId}</select>
+
+ <insert id="insertRun">INSERT INTO modernization_test_run
+  (execution_id,application_id,module,framework,test_type,started_at,finished_at,duration_ms,
+   total_count,passed_count,failed_count,skipped_count,execution_status,content_hash)
+  VALUES(#{executionId},#{applicationId},#{module},#{framework},#{testType},#{startedAt},#{finishedAt},#{durationMs},
+   #{totalCount},#{passedCount},#{failedCount},#{skippedCount},#{executionStatus},#{contentHash})</insert>
+
+ <insert id="insertResults">INSERT INTO modernization_test_result
+  (run_id,test_case_key,test_name,status,duration_ms,http_method,http_status,error_summary,skip_reason)
+  VALUES
+  <foreach collection="results" item="r" separator=",">
+   (#{r.runId},#{r.testCaseKey},#{r.testName},#{r.status},#{r.durationMs},#{r.httpMethod},#{r.httpStatus},#{r.errorSummary},#{r.skipReason})
+  </foreach></insert>
+
+ <sql id="runWhere">
+  <where>
+   <if test="module != null and module != ''">AND module=#{module}</if>
+   <if test="testType != null and testType != ''">AND test_type=#{testType}</if>
+  </where>
+ </sql>
+
+ <select id="listRuns" resultType="map">SELECT <include refid="runColumns"/> FROM modernization_test_run
+  <include refid="runWhere"/> ORDER BY started_at DESC, run_id DESC LIMIT #{size} OFFSET #{offset}</select>
+
+ <select id="countRuns" resultType="long">SELECT COUNT(*) FROM modernization_test_run <include refid="runWhere"/></select>
+
+ <select id="findRunById" resultType="map">SELECT <include refid="runColumns"/>
+  FROM modernization_test_run WHERE run_id=#{runId}</select>
+
+ <select id="findResultsByRunId" resultType="map">SELECT result_id AS resultId, test_case_key AS testCaseKey,
+  test_name AS testName, status, duration_ms AS durationMs, http_method AS httpMethod,
+  http_status AS httpStatus, error_summary AS errorSummary, skip_reason AS skipReason
+  FROM modernization_test_result WHERE run_id=#{runId}
+  <if test="status != null and status != ''">AND status=#{status}</if>
+  ORDER BY result_id</select>
+
+ <!-- 최신 Run 기준: (application_id, module, test_type) 별 가장 최근 1건만. 전체 이력 합산이 아님. -->
+ <select id="latestRunSummaryByApplication" resultType="map">SELECT
+  r.application_id AS applicationId, a.application_name AS applicationName, r.module, r.test_type AS testType,
+  r.run_id AS runId, r.started_at AS startedAt, r.total_count AS totalCount, r.passed_count AS passedCount,
+  r.failed_count AS failedCount, r.skipped_count AS skippedCount, r.execution_status AS executionStatus,
+  CASE WHEN r.total_count - r.skipped_count = 0 THEN NULL
+       ELSE ROUND(r.passed_count * 100.0 / (r.total_count - r.skipped_count), 1) END AS passRatePercent
+  FROM modernization_test_run r
+  JOIN modernization_application a ON a.application_id = r.application_id
+  WHERE r.run_id = (SELECT x.run_id FROM modernization_test_run x
+                    WHERE x.application_id=r.application_id AND x.module=r.module AND x.test_type=r.test_type
+                    ORDER BY x.started_at DESC, x.run_id DESC LIMIT 1)
+  ORDER BY r.application_id, r.test_type</select>
+
+ <select id="latestRunByModuleAndType" resultType="map">SELECT <include refid="runColumns"/>
+  FROM modernization_test_run WHERE module=#{module} AND test_type=#{testType}
+  ORDER BY started_at DESC, run_id DESC LIMIT 1</select>
+</mapper>

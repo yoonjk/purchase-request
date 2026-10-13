@@ -14,7 +14,8 @@
     "test:purchase:api": "node tests/run-newman.js purchase",
     "test:hr:ui": "node tests/run-playwright.js hr tests/e2e/hr.spec.ts",
     "test:hr:api": "node tests/run-newman.js hr",
-    "test:all": "node tests/run-all.js"
+    "test:all": "node tests/run-all.js",
+    "test:publish": "node tests/publish-results.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.56.0",

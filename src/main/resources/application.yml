@@ -15,6 +15,7 @@ mybatis:
     map-underscore-to-camel-case: true
 hub:
     admin-login-ids: ${HUB_ADMIN_LOGIN_IDS:}
+    test-api-token: ${HUB_TEST_API_TOKEN:}
 
 logging:
   level:
