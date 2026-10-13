@@ -1,0 +1,10 @@
+.step4-root{display:grid;gap:16px}.step4-toolbar,.step4-paging,.step4-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.step4-toolbar input,.step4-toolbar select,.step4-field input,.step4-field select,.step4-field textarea,.step4-paging select{padding:9px;border:1px solid #aeb8c5;border-radius:6px;max-width:100%;background:var(--surface,#fff);color:inherit}.step4-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}.step4-kpi{border:1px solid #d7dce3;border-radius:8px;padding:15px;display:grid;gap:8px}.step4-kpi strong{font-size:25px}.step4-scroll{overflow-x:auto}.step4-table{width:100%;border-collapse:collapse;min-width:780px}.step4-table th,.step4-table td{border-bottom:1px solid #dce1e7;text-align:left;padding:11px}.step4-btn{border:1px solid #8c99ab;border-radius:6px;padding:8px 14px;min-width:unset;width:auto;height:auto;white-space:nowrap;cursor:pointer;background:#f5f7fa;color:#17212d}.step4-btn:disabled{opacity:.45;cursor:not-allowed}.step4-form{border:1px solid #cbd3df;padding:18px;border-radius:9px;display:grid;gap:12px;margin-top:10px}.step4-field{display:grid;gap:5px}.step4-error{color:#ad2432}@media(max-width:600px){.step4-toolbar input{width:100%}.step4-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Step 4 customer-facing inline notices, aligned with Step 3 blue/gray palette */
+.step4-notice{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid #b8c7dc;border-left:4px solid #0f62fe;border-radius:6px;background:#f1f5fb;color:#192b43;font-size:13px;line-height:1.5}
+.step4-notice-error{border-left-color:#da1e28;background:#fff1f1;border-color:#f1b9bc;color:#8a1c24}
+.step4-notice-success{border-left-color:#198038;background:#defbe6;border-color:#a7d9b4;color:#145c2a}
+.step4-notice .step4-notice-close{border:0;background:transparent;color:inherit;padding:4px 8px;font-weight:600}
+.step4-field-error{margin:0;color:#b4232f;font-size:12px;line-height:1.5}
+.step4-field-error[hidden]{display:none}
+.step4-field input[aria-invalid=true]{border-color:#da1e28;outline-color:#da1e28}

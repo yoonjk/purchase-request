@@ -1,0 +1,1424 @@
+{
+  "info": {
+    "name": "HR API",
+    "description": "HR: 직원 목록/등록/수정, 연차 조회/신청/수정/취소, 입력 검증, 인증/CSRF",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (!pm.collectionVariables.get('empId')) {",
+          "  pm.collectionVariables.set('empId', ('NM' + Date.now().toString(36).toUpperCase()).slice(0, 10));",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "00 Unauthenticated",
+      "description": "로그인 전 요청. 세션이 없으므로 /api 는 401, CSRF 없는 변경 요청은 403.",
+      "item": [
+        {
+          "name": "[HR-API-01] 비인증 GET /api/hr/employees → 401",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/hr/employees"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-02] 비인증 POST /api/hr/employees (CSRF 없음) → 403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/hr/employees",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"employeeId\":\"{{empId}}\",\"name\":\"NM 테스터\",\"department\":\"QA\",\"managerId\":null,\"annualLeaveDays\":10}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "01 Auth Setup",
+      "description": "세션 쿠키(JSESSIONID, XSRF-TOKEN)는 Newman cookie jar 가 유지한다. 토큰/쿠키는 리포트에 기록하지 않는다.",
+      "item": [
+        {
+          "name": "[HR-API-S1] CSRF 토큰 발급 (permitAll)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/auth/csrf"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('headerName=X-XSRF-TOKEN', () => pm.expect(j.headerName).to.eql('X-XSRF-TOKEN'));",
+                  "pm.test('token 존재', () => pm.expect(j.token).to.be.a('string').and.not.empty);",
+                  "pm.collectionVariables.set('csrfToken', j.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-S2] 잘못된 비밀번호 로그인 → /login.html?error 로 redirect",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/login",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "{{loginId}}"
+                },
+                {
+                  "key": "password",
+                  "value": "intentionally-wrong-password-12345"
+                },
+                {
+                  "key": "_csrf",
+                  "value": "{{csrfToken}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 302', () => pm.response.to.have.status(302));",
+                  "pm.test('Location 에 error 포함', () => pm.expect(pm.response.headers.get('Location')).to.include('/login.html?error'));"
+                ]
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "[HR-API-S3] 정상 로그인 → /dashboard.html 로 redirect",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/login",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "{{loginId}}"
+                },
+                {
+                  "key": "password",
+                  "value": "{{loginPassword}}"
+                },
+                {
+                  "key": "_csrf",
+                  "value": "{{csrfToken}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 302', () => pm.response.to.have.status(302));",
+                  "pm.test('Location 에 dashboard.html 포함', () => pm.expect(pm.response.headers.get('Location')).to.include('/dashboard.html'));"
+                ]
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "[HR-API-S4] 로그인 후 CSRF 토큰 재발급",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/auth/csrf"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.collectionVariables.set('csrfToken', j.token);",
+                  "pm.test('token 갱신', () => pm.expect(j.token).to.be.a('string').and.not.empty);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-S5] 인증 확인 GET /api/auth/me",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/auth/me"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('loginId 반환', () => pm.expect(j.loginId).to.be.a('string').and.not.empty);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 CSRF Security",
+      "description": "기존 CSRF 설정(CookieCsrfTokenRepository) 동작 확인. 403 이므로 DB 변경 없음.",
+      "item": [
+        {
+          "name": "[HR-SEC-01] 로그인 상태 + X-XSRF-TOKEN 없이 POST → 403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/hr/employees",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"employeeId\":\"{{empId}}\",\"name\":\"NM 테스터\",\"department\":\"QA\",\"managerId\":null,\"annualLeaveDays\":10}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-SEC-02] 로그인 상태 + 잘못된 X-XSRF-TOKEN → 403",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-XSRF-TOKEN",
+                "value": "invalid-token-value"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/hr/employees",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"employeeId\":\"{{empId}}\",\"name\":\"NM 테스터\",\"department\":\"QA\",\"managerId\":null,\"annualLeaveDays\":10}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 Read (no DB change)",
+      "item": [
+        {
+          "name": "[HR-API-01] 직원 목록 조회 → 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/hr/employees"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('배열', () => pm.expect(j).to.be.an('array'));",
+                  "pm.test('직원 필드', () => { if (j.length) ['employeeId','name','department','annualLeaveDays','usedLeaveDays'].forEach(k => pm.expect(j[0]).to.have.property(k)); });",
+                  "pm.test('사용 연차 ≤ 총 연차', () => j.forEach(e => pm.expect(e.usedLeaveDays).to.be.at.most(e.annualLeaveDays)));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-02] 존재하지 않는 직원 조회 → 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/hr/employees/ZZNOEXIST"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-03] 존재하지 않는 직원의 연차 조회 → 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/hr/employees/ZZNOEXIST/leaves"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 Validation (no DB change)",
+      "description": "서버가 DB 변경 전에 거부하는 요청.",
+      "item": [
+        {
+          "name": "[HR-API-04] 직원 등록: name 누락 → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-XSRF-TOKEN",
+                "value": "{{csrfToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/hr/employees",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"employeeId\":\"{{empId}}\",\"department\":\"QA\",\"managerId\":null,\"annualLeaveDays\":10}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-05] 직원 등록: department 공백 → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-XSRF-TOKEN",
+                "value": "{{csrfToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/hr/employees",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"employeeId\":\"{{empId}}\",\"name\":\"NM 테스터\",\"department\":\"  \",\"managerId\":null,\"annualLeaveDays\":10}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-06] 직원 등록: annualLeaveDays 누락 → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-XSRF-TOKEN",
+                "value": "{{csrfToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/hr/employees",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"employeeId\":\"{{empId}}\",\"name\":\"NM 테스터\",\"department\":\"QA\",\"managerId\":null}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-07] 직원 등록: annualLeaveDays 366 → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-XSRF-TOKEN",
+                "value": "{{csrfToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/hr/employees",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"employeeId\":\"{{empId}}\",\"name\":\"NM 테스터\",\"department\":\"QA\",\"managerId\":null,\"annualLeaveDays\":366}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-08] 직원 등록: annualLeaveDays 음수 → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-XSRF-TOKEN",
+                "value": "{{csrfToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/hr/employees",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"employeeId\":\"{{empId}}\",\"name\":\"NM 테스터\",\"department\":\"QA\",\"managerId\":null,\"annualLeaveDays\":-1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-09] 직원 등록: 직원 ID 11자 → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-XSRF-TOKEN",
+                "value": "{{csrfToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/hr/employees",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"employeeId\":\"ABCDEFGHIJK\",\"name\":\"NM 테스터\",\"department\":\"QA\",\"managerId\":null,\"annualLeaveDays\":10}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-10] 직원 등록: 직원 ID 특수문자 → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-XSRF-TOKEN",
+                "value": "{{csrfToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/hr/employees",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"employeeId\":\"bad id!\",\"name\":\"NM 테스터\",\"department\":\"QA\",\"managerId\":null,\"annualLeaveDays\":10}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-11] 직원 등록: 존재하지 않는 관리자 ID → 404",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-XSRF-TOKEN",
+                "value": "{{csrfToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/hr/employees",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"employeeId\":\"{{empId}}\",\"name\":\"NM 테스터\",\"department\":\"QA\",\"managerId\":\"ZZNOEXIST\",\"annualLeaveDays\":10}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-12] 직원 수정: 존재하지 않는 직원 → 404",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "X-XSRF-TOKEN",
+                "value": "{{csrfToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/hr/employees/ZZNOEXIST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"employeeId\":\"{{empId}}\",\"name\":\"NM 테스터\",\"department\":\"QA\",\"managerId\":null,\"annualLeaveDays\":10}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-13] 직원 삭제: 존재하지 않는 직원 → 404",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-XSRF-TOKEN",
+                "value": "{{csrfToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/hr/employees/ZZNOEXIST"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-14] 연차 신청: days 0 → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-XSRF-TOKEN",
+                "value": "{{csrfToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/hr/employees/ZZNOEXIST/leaves",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"startDate\":\"2030-01-07\",\"endDate\":\"2030-01-09\",\"days\":0,\"reason\":\"newman\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-15] 연차 신청: 종료일이 시작일보다 이전 → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-XSRF-TOKEN",
+                "value": "{{csrfToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/hr/employees/ZZNOEXIST/leaves",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"startDate\":\"2030-01-09\",\"endDate\":\"2030-01-07\",\"days\":3,\"reason\":\"newman\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-16] 연차 신청: 일수가 기간보다 큼 → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-XSRF-TOKEN",
+                "value": "{{csrfToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/hr/employees/ZZNOEXIST/leaves",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"startDate\":\"2030-01-07\",\"endDate\":\"2030-01-07\",\"days\":3,\"reason\":\"newman\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-17] 연차 신청: 사유 501자 → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-XSRF-TOKEN",
+                "value": "{{csrfToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/hr/employees/ZZNOEXIST/leaves",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"startDate\":\"2030-01-07\",\"endDate\":\"2030-01-09\",\"days\":3,\"reason\":\"RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-18] 연차 신청: 존재하지 않는 직원 → 404",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-XSRF-TOKEN",
+                "value": "{{csrfToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/hr/employees/ZZNOEXIST/leaves",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"startDate\":\"2030-01-07\",\"endDate\":\"2030-01-09\",\"days\":3,\"reason\":\"newman\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "[MUTATION] 05 Employee & Leave lifecycle",
+      "description": "테스트가 만든 직원/연차를 마지막에 삭제한다. 중간 실패 시 {{empId}}(NM 접두사) 직원이 남을 수 있다.",
+      "item": [
+        {
+          "name": "[HR-API-19] 직원 등록 (annual=10) → 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-XSRF-TOKEN",
+                "value": "{{csrfToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/hr/employees",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"employeeId\":\"{{empId}}\",\"name\":\"NM 테스터\",\"department\":\"QA\",\"managerId\":null,\"annualLeaveDays\":10}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json();",
+                  "pm.test('등록 값 반영', () => { pm.expect(j.employeeId).to.eql(pm.collectionVariables.get('empId')); pm.expect(j.name).to.eql('NM 테스터'); pm.expect(j.annualLeaveDays).to.eql(10); pm.expect(j.usedLeaveDays).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-20] 직원 단건 조회 → 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/hr/employees/{{empId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('department=QA', () => pm.expect(j.department).to.eql('QA'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-21] 직원 목록에 등록한 직원 포함 → 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/hr/employees"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('목록에 존재', () => pm.expect(j.some(e => e.employeeId === pm.collectionVariables.get('empId'))).to.be.true);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-22] 직원 정보 수정 (name/department/annual=20) → 200",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "X-XSRF-TOKEN",
+                "value": "{{csrfToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/hr/employees/{{empId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"employeeId\":\"{{empId}}\",\"name\":\"NM 수정후\",\"department\":\"DevOps\",\"managerId\":null,\"annualLeaveDays\":20}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('수정 값 반영', () => { pm.expect(j.name).to.eql('NM 수정후'); pm.expect(j.department).to.eql('DevOps'); pm.expect(j.annualLeaveDays).to.eql(20); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-23] 연차 신청 3일 → 201, APPROVED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-XSRF-TOKEN",
+                "value": "{{csrfToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/hr/employees/{{empId}}/leaves",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"startDate\":\"2030-01-07\",\"endDate\":\"2030-01-09\",\"days\":3,\"reason\":\"newman\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "const j = pm.response.json();",
+                  "pm.test('연차 필드', () => { pm.expect(j.status).to.eql('APPROVED'); pm.expect(j.days).to.eql(3); pm.expect(j.startDate).to.eql('2030-01-07'); pm.expect(j.employeeId).to.eql(pm.collectionVariables.get('empId')); });",
+                  "pm.collectionVariables.set('leaveId', j.leaveId);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-24] 연차 신청 후 사용 일수 3 → 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/hr/employees/{{empId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('used=3', () => pm.expect(j.usedLeaveDays).to.eql(3));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-25] 연차 내역 조회 → 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/hr/employees/{{empId}}/leaves"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('신청한 연차 포함', () => pm.expect(j.some(l => String(l.leaveId) === String(pm.collectionVariables.get('leaveId')) && l.status === 'APPROVED')).to.be.true);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-26] 잔여 연차(17일) 초과 신청 18일 → 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-XSRF-TOKEN",
+                "value": "{{csrfToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/hr/employees/{{empId}}/leaves",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"startDate\":\"2030-02-01\",\"endDate\":\"2030-02-28\",\"days\":18,\"reason\":\"newman\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-27] 연차 총량을 사용 일수(3)보다 작게 수정(2) → 409",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "X-XSRF-TOKEN",
+                "value": "{{csrfToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/hr/employees/{{empId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"employeeId\":\"{{empId}}\",\"name\":\"NM 테스터\",\"department\":\"QA\",\"managerId\":null,\"annualLeaveDays\":2}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-28] 연차 수정 (3일 → 2일) → 200",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "X-XSRF-TOKEN",
+                "value": "{{csrfToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/hr/leaves/{{leaveId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"startDate\":\"2030-01-07\",\"endDate\":\"2030-01-08\",\"days\":2,\"reason\":\"newman\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('days=2', () => { pm.expect(j.days).to.eql(2); pm.expect(j.endDate).to.eql('2030-01-08'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-29] 연차 수정 후 사용 일수 2 → 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/hr/employees/{{empId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('used=2', () => pm.expect(j.usedLeaveDays).to.eql(2));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-30] 연차 취소 → 204",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-XSRF-TOKEN",
+                "value": "{{csrfToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/hr/leaves/{{leaveId}}/cancel"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-31] 취소 후 사용 일수 0 복원 → 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/hr/employees/{{empId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('used=0', () => pm.expect(j.usedLeaveDays).to.eql(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-32] 이미 취소된 연차 재취소 → 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-XSRF-TOKEN",
+                "value": "{{csrfToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/hr/leaves/{{leaveId}}/cancel"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-33] 취소된 연차 삭제 → 204",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-XSRF-TOKEN",
+                "value": "{{csrfToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/hr/leaves/{{leaveId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-34] 삭제된 연차 재삭제 → 404",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-XSRF-TOKEN",
+                "value": "{{csrfToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/hr/leaves/{{leaveId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-35] 직원 삭제(정리) → 204",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-XSRF-TOKEN",
+                "value": "{{csrfToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/hr/employees/{{empId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "[HR-API-36] 삭제된 직원 조회 → 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/hr/employees/{{empId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

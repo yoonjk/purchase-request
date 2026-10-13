@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.demo.purchase.dao.MemberLoginMapper">
+
+    <resultMap id="memberLoginMap"
+               type="com.demo.purchase.dao.MemberLoginMapper$MemberLogin">
+        <constructor>
+            <idArg column="MEMBER_ID" javaType="java.lang.Long"/>
+            <arg column="LOGIN_ID" javaType="java.lang.String"/>
+            <arg column="PASSWORD_HASH" javaType="java.lang.String"/>
+            <arg column="ACTIVE_YN" javaType="java.lang.String"/>
+            <arg column="INVESTMENT_PROFILE" javaType="java.lang.String"/>
+        </constructor>
+    </resultMap>
+
+    <select id="findByLoginId" resultMap="memberLoginMap">
+        SELECT
+            MEMBER_ID,
+            LOGIN_ID,
+            PASSWORD_HASH,
+            ACTIVE_YN,
+            INVESTMENT_PROFILE
+        FROM member_login
+        WHERE LOGIN_ID = #{loginId}
+    </select>
+
+</mapper>

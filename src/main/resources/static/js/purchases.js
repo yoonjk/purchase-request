@@ -242,7 +242,7 @@ if (createForm) {
     try {
       const r = await fetch('/api/purchase-requests', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Request-ID': crypto.randomUUID() },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(x)
       });
       const d = await r.json();
@@ -316,7 +316,7 @@ if (lookupBtn) {
     setNotification('info', 'Searching:', `Request ID #${id} 정보를 조회하는 중입니다...`);
 
     try {
-      const r = await fetch('/api/purchase-requests/' + encodeURIComponent(id) + '?test_run_id=' + encodeURIComponent(run), { headers: { 'X-Request-ID': crypto.randomUUID() } });
+      const r = await fetch('/api/purchase-requests/' + encodeURIComponent(id) + '?test_run_id=' + encodeURIComponent(run));
       const d = await r.json();
       if (!r.ok) {
         throw new Error(d.message || JSON.stringify(d));

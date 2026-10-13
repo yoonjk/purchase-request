@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.purchase.dao.HrMapper">
+	<resultMap id="employeeMap" type="com.demo.purchase.dao.HrMapper$Employee">
+		<constructor>
+			<idArg column="employee_id" javaType="string" />
+			<arg column="name" javaType="string" />
+			<arg column="department" javaType="string" />
+			<arg column="manager_id" javaType="string" />
+			<arg column="annual_leave_days" javaType="java.lang.Integer" />
+			<arg column="used_leave_days" javaType="java.lang.Integer" />
+		</constructor>
+	</resultMap>
+	<resultMap id="leaveMap" type="com.demo.purchase.dao.HrMapper$LeaveEntry">
+		<constructor>
+			<idArg column="leave_id" javaType="java.lang.Long" />
+			<arg column="employee_id" javaType="string" />
+			<arg column="start_date" javaType="java.time.LocalDate" />
+			<arg column="end_date" javaType="java.time.LocalDate" />
+			<arg column="days" javaType="java.lang.Integer" />
+			<arg column="reason" javaType="string" />
+			<arg column="status" javaType="string" />
+			<arg column="created_at" javaType="java.time.LocalDateTime" />
+		</constructor>
+	</resultMap>
+	<select id="lastInsertId" resultType="long">SELECT LAST_INSERT_ID()</select>
+	<select id="employees" resultMap="employeeMap">SELECT
+		employee_id,name,department,manager_id,annual_leave_days,used_leave_days
+		FROM employees ORDER BY employee_id DESC LIMIT 500</select>
+	<select id="employee" resultMap="employeeMap">SELECT
+		employee_id,name,department,manager_id,annual_leave_days,used_leave_days
+		FROM employees WHERE employee_id=#{id}</select>
+	<select id="employeeForUpdate" resultMap="employeeMap">SELECT
+		employee_id,name,department,manager_id,annual_leave_days,used_leave_days
+		FROM employees WHERE employee_id=#{id} FOR UPDATE</select>
+	<insert id="create">
+		INSERT INTO
+		employees(employee_id,name,department,manager_id,annual_leave_days,used_leave_days)
+		VALUES(#{employeeId},#{name},#{department},#{managerId},#{annualLeaveDays},0)</insert>
+	<update id="update">UPDATE employees SET
+		name=#{name},department=#{department},manager_id=#{managerId},annual_leave_days=#{annualLeaveDays}
+		WHERE employee_id=#{employeeId}</update>
+	<delete id="delete">DELETE FROM employees WHERE employee_id=#{id}</delete>
+	<select id="leaves" resultMap="leaveMap">SELECT
+		leave_id,employee_id,start_date,end_date,days,reason,status,created_at
+		FROM employee_leave_requests WHERE employee_id=#{employeeId} ORDER BY
+		leave_id DESC LIMIT 500</select>
+	<select id="leaveForUpdate" resultMap="leaveMap">SELECT
+		leave_id,employee_id,start_date,end_date,days,reason,status,created_at
+		FROM employee_leave_requests WHERE leave_id=#{id} FOR UPDATE</select>
+	<insert id="addLeave">
+		INSERT INTO
+		employee_leave_requests(employee_id,start_date,end_date,days,reason,status)
+		VALUES(#{employeeId},#{startDate},#{endDate},#{days},#{reason},'APPROVED')</insert>
+	<update id="cancelLeave">UPDATE employee_leave_requests SET
+		status='CANCELLED' WHERE leave_id=#{id} AND status='APPROVED'</update>
+	<update id="incrementUsed">UPDATE employees SET
+		used_leave_days=used_leave_days+#{days} WHERE employee_id=#{id} AND
+		used_leave_days+#{days} BETWEEN 0 AND annual_leave_days</update>
+	<update id="updateLeave">UPDATE employee_leave_requests SET
+		start_date=#{startDate},end_date=#{endDate},days=#{days},reason=#{reason}
+		WHERE leave_id=#{leaveId} AND status='APPROVED'</update>
+	<delete id="deleteCancelledLeave">DELETE FROM employee_leave_requests WHERE
+		leave_id=#{id} AND status='CANCELLED'</delete>
+</mapper>

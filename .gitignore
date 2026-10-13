@@ -4,6 +4,9 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+.env
+node_modules/
+
 ### STS ###
 .apt_generated
 .classpath
@@ -31,3 +34,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Test runtime output - never commit
+test-results/
+playwright-report/
+reports/
+.npm-cache/

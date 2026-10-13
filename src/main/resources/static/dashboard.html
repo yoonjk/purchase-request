@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>AI Modernization Hub</title>
+<link href="/css/management.css?v=20261013-hr-final2" rel="stylesheet"/>
+<link href="/css/hub-step1.css?v=4" rel="stylesheet"/><link rel="stylesheet" href="/css/hub-step2.css?v=4"/><link rel="stylesheet" href="/css/hub-step3.css?v=2" />
+<link rel="stylesheet" href="/css/hub-step4.css?v=1" /><link rel="stylesheet" href="/css/hub-step5.css?v=1" /></head>
+<body>
+<header class="app-header">
+<div class="brand">
+<span aria-label="IBM inspired" class="brand-mark">
+     IBM
+    </span>
+<span class="brand-divider">
+</span>
+<strong>AI Modernization Hub</strong>
+</div>
+<div class="header-actions">
+<span id="user">
+</span>
+<form action="/logout" id="logout" method="post">
+<input id="logoutCsrf" name="_csrf" type="hidden"/>
+<button class="secondary">
+      로그아웃
+     </button>
+</form>
+</div>
+</header>
+<div class="app-shell">
+<nav class="sidebar"><div class="hub-sidebar-head"><div aria-label="사이드바 접기/펼치기" class="hub-collapse" id="hubCollapse" title="사이드바 접기/펼치기" role="button" tabindex="0">☰</div><span class="hub-sidebar-label">WORKSPACE</span></div>
+<div class="hub-group" data-group="modern"><div aria-expanded="true" class="hub-group-trigger" data-group-trigger="modern" role="button" tabindex="0" title="Modernization Management"><span class="nav-icon">◈</span><span class="hub-label">Modernization Management</span><span class="hub-chevron">⌄</span></div><div class="hub-children" data-group-body="modern">
+<div class="hub-link" data-hub-page="modern-dashboard" role="button" tabindex="0"><span class="nav-icon">▦</span><span class="hub-label">Modernization Dashboard</span></div>
+<div class="hub-link" data-hub-page="portfolio" role="button" tabindex="0"><span class="nav-icon">▤</span><span class="hub-label">Application Portfolio</span></div>
+<div class="hub-link" data-hub-page="libraries" role="button" tabindex="0"><span class="nav-icon">▥</span><span class="hub-label">Library Compatibility</span></div>
+<div class="hub-link" data-hub-page="progress" role="button" tabindex="0"><span class="nav-icon">⇄</span><span class="hub-label">Modernization Progress</span></div>
+<div class="hub-link" data-hub-page="reports" role="button" tabindex="0"><span class="nav-icon">▥</span><span class="hub-label">Reports &amp; Analytics</span></div></div></div>
+<div class="hub-group" data-group="test"><div aria-expanded="true" class="hub-group-trigger" data-group-trigger="test" role="button" tabindex="0" title="Test Management"><span class="nav-icon">◇</span><span class="hub-label">Test Management</span><span class="hub-chevron">⌄</span></div><div class="hub-children" data-group-body="test">
+<div class="hub-link" data-hub-page="automation" role="button" tabindex="0"><span class="nav-icon">▷</span><span class="hub-label">Test Automation</span></div>
+<div class="hub-group hub-subgroup" data-group="apps"><div aria-expanded="true" class="hub-group-trigger" data-group-trigger="apps" role="button" tabindex="0" title="Test Applications"><span class="nav-icon">▣</span><span class="hub-label">Test Applications</span><span class="hub-chevron">⌄</span></div><div class="hub-children" data-group-body="apps"><button data-tab="create" type="button"><span class="nav-icon">＋</span><span class="hub-label">구매 요청</span></button><button data-tab="lookup" type="button"><span class="nav-icon">⌕</span><span class="hub-label">구매 요청 조회</span></button><button data-tab="items" type="button"><span class="nav-icon">▤</span><span class="hub-label">구매 물품 관리</span></button><button data-tab="list" type="button"><span class="nav-icon">☷</span><span class="hub-label">구매 요청 목록조회</span></button><button data-tab="products" type="button"><span class="nav-icon">⬡</span><span class="hub-label">상품 관리</span></button><button data-tab="employees" type="button"><span class="nav-icon">♙</span><span class="hub-label">임직원 관리</span></button><button data-tab="leave" type="button"><span class="nav-icon">▦</span><span class="hub-label">연차 관리</span></button></div></div></div></div>
+<div class="hub-link hub-config" data-hub-page="configuration" role="button" tabindex="0" title="Configuration"><span class="nav-icon">⚙</span><span class="hub-label">Configuration</span></div></nav>
+<main class="workspace">
+<div class="page-intro">
+<div class="page-eyebrow">AI MODERNIZATION  /  ENTERPRISE JAVA</div><div class="breadcrumb">
+      홈   /
+      <span id="currentPage">
+       구매 요청
+      </span>
+</div>
+<h1 id="pageTitle">
+      구매 요청
+     </h1>
+<p id="pageDescription">
+      구매 요청을 등록하고 승인 상태를 확인할 수 있습니다.
+     </p>
+<div aria-hidden="true" class="hero-accent"><span class="hero-ring"></span><span class="hero-square"></span><span class="hero-square second"></span></div></div><div class="overview-grid" hidden="" id="productOverview">
+<div class="overview-card"><div class="overview-icon">▦</div><div><span class="overview-label">전체 등록 상품</span><strong id="metricTotal">—</strong><small>Product catalog</small></div></div>
+<div class="overview-card"><div class="overview-icon active-icon">✓</div><div><span class="overview-label">활성 상품</span><strong id="metricActive">—</strong><small>구매 요청에 사용 가능</small></div></div>
+<div class="overview-card"><div class="overview-icon inactive-icon">◌</div><div><span class="overview-label">비활성 상품</span><strong id="metricInactive">—</strong><small>사용 중지된 상품</small></div></div>
+<div class="overview-card overview-action"><span class="overview-label">QUICK ACTION</span><strong>상품 카탈로그</strong><span>상품 등록 및 운영 현황을 관리하세요.</span><button id="jumpToProductForm" type="button">+ 새 상품 등록 <span>↗</span></button></div>
+</div>
+<div aria-live="polite" id="notice" role="status">
+</div>
+<section class="panel" id="create">
+<div class="panel-title">
+<div>
+<div class="panel-kicker">PURCHASE MANAGEMENT  /  CREATE</div><h2 class="section-heading">구매 요청 등록</h2>
+<p>
+        새로운 구매 요청을 등록하고 승인 상태를 확인하세요.
+       </p>
+</div>
+</div>
+<form id="createForm">
+<label>
+       요청자
+       <input maxlength="100" name="requester" required=""/>
+</label>
+<label>
+       Test Run ID
+       <input maxlength="64" name="test_run_id" pattern="[A-Za-z0-9_-]+" required=""/>
+</label>
+<label>
+       요청 금액
+       <input min="0.01" name="amount" required="" step="0.01" type="number"/>
+</label>
+<label>
+       예산
+       <input min="0" name="budget" required="" step="0.01" type="number"/>
+</label>
+<button>
+       구매 요청 등록
+      </button>
+</form>
+<pre id="created"></pre>
+</section>
+<section class="panel lookup-panel" hidden="" id="lookup">
+<div class="panel-title">
+<div>
+<div class="panel-kicker">PURCHASE MANAGEMENT  /  LOOKUP</div><h2 class="section-heading">구매 요청 조회</h2>
+<p>
+        요청 번호와 테스트 실행 ID로 구매 요청 정보를 조회하세요.
+       </p>
+</div>
+</div>
+<form class="lookup-form" id="lookupForm">
+<label class="field-with-icon">
+       Request ID
+       <input min="1" name="id" required="" type="number"/>
+<span aria-hidden="true" class="field-icon">
+        #
+       </span>
+</label>
+<label class="field-with-icon">
+       Test Run ID
+       <input name="run" required=""/>
+<span aria-hidden="true" class="field-icon">
+        ▤
+       </span>
+</label>
+<button class="lookup-submit">
+       ⌕  조회하기
+      </button>
+</form>
+<pre hidden="hidden" id="lookupResult"></pre>
+</section>
+<section class="panel lookup-results" hidden="hidden" id="lookupDetailPanel">
+<div class="panel-title">
+<div>
+<div class="panel-kicker">PURCHASE MANAGEMENT  /  LOOKUPDETAILPANEL</div><h2>조회 결과</h2>
+<p>
+        구매 요청 상세 정보입니다.
+       </p>
+</div>
+<div class="result-actions">
+<button class="outline" id="copyLookup" type="button">
+        ⧉  복사
+       </button>
+<button class="outline" id="downloadLookup" type="button">
+        ↓  JSON 다운로드
+       </button>
+</div>
+</div>
+<div class="lookup-summary" id="lookupSummary">
+</div>
+<div class="result-tabs">
+<button class="result-tab active" data-view="details" type="button">
+       상세 정보
+      </button>
+<button class="result-tab" data-view="json" type="button">
+       JSON
+      </button>
+</div>
+<div class="lookup-details" id="lookupDetails">
+</div>
+<div class="json-view" hidden="" id="lookupJson">
+<pre id="lookupJsonPre"></pre>
+</div>
+</section>
+<section class="panel" hidden="" id="items">
+<div class="panel-title">
+<div>
+<div class="panel-kicker">PURCHASE MANAGEMENT  /  ITEMS</div><h2 class="section-heading">구매 물품 관리</h2>
+<p>
+        구매 요청에 포함된 물품을 추가하거나 수정할 수 있습니다.
+       </p>
+</div>
+</div>
+<label>
+      Request ID
+      <input id="itemRequest" min="1" type="number"/>
+</label>
+<button id="loadItems">
+      물품 조회
+     </button>
+<form id="itemForm">
+<label>
+       SKU
+       <input maxlength="50" name="sku" required=""/>
+</label>
+<label>
+       수량
+       <input min="1" name="quantity" required="" type="number"/>
+</label>
+<button>
+       물품 등록
+      </button>
+</form>
+<div id="itemTable">
+</div>
+</section>
+<section class="panel" hidden="" id="list">
+<div class="panel-title">
+<div>
+<div class="panel-kicker">PURCHASE MANAGEMENT  /  LIST</div><h2 class="section-heading">구매 요청 목록조회</h2>
+<p>
+        등록된 구매 요청과 승인 상태를 확인할 수 있습니다.
+       </p>
+</div>
+</div>
+<button id="loadRequests">
+      새로고침
+     </button>
+<div id="requestTable">
+</div>
+</section>
+<section class="panel" hidden="" id="products">
+<div class="panel-title">
+<div>
+<div class="panel-kicker">PURCHASE MANAGEMENT  /  PRODUCTS</div><h2>상품 등록</h2>
+<p>
+        새로운 상품을 등록하거나 기존 상품 정보를 관리할 수 있습니다.
+       </p>
+</div>
+<span class="panel-hint">
+       Product catalog
+      </span>
+</div>
+<form class="product-form-grid" id="productForm">
+<label class="product-field">
+       SKU
+       <span class="required">
+        *
+       </span>
+<input maxlength="50" name="sku" placeholder="예: BOB-LAPTOP-001" required=""/>
+<span class="field-caption">고유 상품 식별 코드</span></label>
+<label class="product-field">
+       상품명
+       <span class="required">
+        *
+       </span>
+<input maxlength="200" name="name" placeholder="상품명을 입력하세요" required=""/>
+<span class="field-caption">구매 화면에 표시되는 이름</span></label>
+<label class="product-field">
+       단가
+       <span class="required">
+        *
+       </span>
+<input min="0" name="unitPrice" placeholder="0" required="" step="0.01" type="number"/>
+<span class="field-caption">원화 기준 공급 단가</span></label>
+<label class="product-field">
+       활성 여부
+       <select name="active">
+<option value="true">
+         활성
+        </option>
+<option value="false">
+         비활성
+        </option>
+</select>
+<span class="field-caption">구매 요청 사용 가능 여부</span></label>
+<button class="primary-action">+  상품 등록</button>
+</form>
+</section>
+<section class="panel product-list-panel catalog-panel" hidden="" id="productsList">
+<div class="panel-title">
+<div>
+<div class="panel-kicker">PURCHASE MANAGEMENT  /  PRODUCTSLIST</div><h2>상품 목록</h2>
+<p>
+        등록된 상품 목록입니다.
+       </p>
+</div>
+<div class="table-tools">
+<input aria-label="상품명 또는 SKU 검색" id="productSearch" placeholder="상품명 또는 SKU 검색..." type="search"/>
+<span id="productCount">
+</span>
+<button class="outline" id="loadProducts" type="button">
+        ↻  새로고침
+       </button>
+</div>
+</div>
+<div class="table-scroll" id="productTable">
+</div>
+</section>
+<footer class="app-footer"><span>IBM-inspired Purchase Management</span><span>Enterprise Demo Console · Java 21 / Spring Boot</span></footer>
+<section class="panel" hidden="" id="employees">
+<div class="panel-title"><div><h2>◇ 임직원 관리</h2><p>직원 정보를 등록하고 수정하거나 조회할 수 있습니다.</p></div><span class="panel-hint">HR / PEOPLE</span></div>
+<div class="hr-stats"><div><span>등록 직원</span><strong id="hrEmployeeTotal">0</strong></div><div><span>총 연차 부여</span><strong id="hrLeaveGranted">0일</strong></div><div><span>총 연차 사용</span><strong id="hrLeaveUsed">0일</strong></div></div>
+<form class="hr-form" id="employeeForm"><label>직원 ID *<input maxlength="10" name="employeeId" pattern="[A-Za-z0-9_-]{1,10}" placeholder="예: EMP001" required=""/></label><label>직원명 *<input maxlength="100" name="name" placeholder="직원 이름" required=""/></label><label>부서 *<input maxlength="100" name="department" placeholder="예: IT 서비스" required=""/></label><label>관리자 ID<input maxlength="10" name="managerId" placeholder="선택 사항"/></label><label>연간 연차 일수 *<input max="365" min="0" name="annualLeaveDays" required="" type="number" value="15"/></label><div class="hr-form-actions"><button id="employeeSubmit" type="submit">직원 등록</button><button class="outline" id="employeeReset" type="button">입력 초기화</button></div></form>
+<div class="hr-table-head"><h3>직원 목록</h3><div class="table-tools"><input id="employeeSearch" placeholder="이름 또는 부서 검색" type="search"/><button class="outline" id="refreshEmployees" type="button">↻ 새로고침</button></div></div>
+<div class="table-scroll" id="employeeTable"></div>
+</section>
+<section class="panel" hidden="" id="leave">
+<div class="panel-title"><div><h2>◇ 연차 관리</h2><p>직원별 잔여 연차를 확인하고 연차 사용 및 취소를 관리합니다.</p></div><span class="panel-hint">HR / LEAVE</span></div>
+<div class="hr-leave-top"><label>직원 선택<select id="leaveEmployee"><option value="">직원을 선택하세요</option></select></label><div class="hr-balance"><div><span>연차 총량</span><strong id="leaveTotal">—</strong></div><div><span>사용 연차</span><strong id="leaveUsed">—</strong></div><div><span>잔여 연차</span><strong id="leaveRemaining">—</strong></div></div></div>
+<form class="hr-form" id="leaveForm"><input name="leaveId" type="hidden" value=""/><label>시작일 *<input name="startDate" required="" type="date"/></label><label>종료일 *<input name="endDate" required="" type="date"/></label><label>사용 일수 *<input max="365" min="1" name="days" placeholder="일 단위" required="" type="number"/></label><label>사유<input maxlength="500" name="reason" placeholder="선택 사항"/></label><div class="hr-form-actions"><button id="leaveSubmit" type="submit">연차 사용 등록</button><button class="outline" id="leaveReset" type="button">초기화</button></div></form>
+<p class="hr-note">연차 사용 등록 시 즉시 승인 처리되며, 사용 일수는 직접 입력합니다. 주말·공휴일은 자동 계산하지 않습니다.</p>
+<div class="hr-table-head"><h3>연차 사용 내역</h3></div><div class="table-scroll" id="leaveTable"></div>
+</section>
+<section class="panel" hidden="" id="hubPreview"><div class="panel-title"><div><h2 id="hubPreviewTitle">Modernization Dashboard</h2><p id="hubPreviewSubtitle">32개 애플리케이션 현대화 프로젝트</p></div><span class="hub-demo-tag">AI MODERNIZATION HUB</span></div><div id="hubPreviewBody"></div></section></main>
+</div>
+<div class="modal-overlay" hidden="" id="productEditModal">
+<div aria-describedby="productEditDesc" aria-labelledby="productEditTitle" aria-modal="true" class="modal-dialog" role="dialog" tabindex="-1">
+<div class="modal-header">
+<div>
+<div class="modal-eyebrow">
+       PRODUCT CATALOG
+      </div>
+<h2 id="productEditTitle">
+       상품 정보 수정
+      </h2>
+<p id="productEditDesc">
+       변경할 정보를 입력하고 저장하세요.
+      </p>
+</div>
+<button aria-label="닫기" class="modal-close" id="closeProductEdit" type="button">
+      ×
+     </button>
+</div>
+<form id="productEditForm">
+<div class="modal-content">
+<label>
+       SKU
+       <input aria-readonly="true" id="editProductSku" readonly=""/>
+</label>
+<label>
+       상품명
+       <span class="required">
+        *
+       </span>
+<input autocomplete="off" id="editProductName" maxlength="200" required=""/>
+</label>
+<label>
+       단가 (₩)
+       <span class="required">
+        *
+       </span>
+<input id="editProductPrice" min="0" required="" step="0.01" type="number"/>
+</label>
+<label>
+       활성 여부
+       <select id="editProductActive">
+<option value="true">
+         활성
+        </option>
+<option value="false">
+         비활성
+        </option>
+</select>
+</label>
+<p class="modal-error" hidden="" id="productEditError" role="alert">
+</p>
+</div>
+<div class="modal-footer">
+<button class="modal-cancel" id="cancelProductEdit" type="button">
+       취소
+      </button>
+<button id="saveProductEdit" type="submit">
+       변경사항 저장
+      </button>
+</div>
+</form>
+</div>
+</div>
+<script src="/js/management.js?v=20261013-hr-final2">
+</script>
+<script src="/js/hub-step1.js?v=2"></script><script src="/js/hub-step2.js?v=3"></script><script src="/js/hub-step3.js?v=1"></script><script src="/js/hub-step4.js?v=1"></script><script src="/js/hub-step5.js?v=1"></script></body>
+</html>

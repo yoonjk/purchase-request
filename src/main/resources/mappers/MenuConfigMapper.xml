@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.purchase.dao.MenuConfigMapper">
+  <resultMap id="menuMap" type="com.demo.purchase.dao.MenuConfigMapper$MenuConfig">
+    <constructor>
+      <idArg column="menu_code" javaType="java.lang.String"/>
+      <arg column="menu_name" javaType="java.lang.String"/>
+      <arg column="visible" javaType="java.lang.Boolean"/>
+      <arg column="sort_order" javaType="java.lang.Integer"/>
+      <arg column="deleted" javaType="java.lang.Boolean"/>
+    </constructor>
+  </resultMap>
+  <sql id="columns">menu_code, menu_name, (visible_yn = 'Y') AS visible, sort_order, (deleted_yn = 'Y') AS deleted</sql>
+  <select id="findAll" resultMap="menuMap">
+    SELECT <include refid="columns"/> FROM app_menu_config WHERE deleted_yn = 'N' ORDER BY sort_order, menu_code
+  </select>
+  <select id="findAllIncludingDeleted" resultMap="menuMap">
+    SELECT <include refid="columns"/> FROM app_menu_config ORDER BY deleted_yn, sort_order, menu_code
+  </select>
+  <update id="updateMenu">
+    UPDATE app_menu_config SET menu_name = #{name}, visible_yn = CASE WHEN #{visible} THEN 'Y' ELSE 'N' END,
+    sort_order = #{sortOrder} WHERE menu_code = #{code} AND deleted_yn = 'N'
+  </update>
+  <update id="softDelete">
+    UPDATE app_menu_config SET deleted_yn = 'Y', visible_yn = 'N' WHERE menu_code = #{code} AND deleted_yn = 'N'
+  </update>
+  <update id="restore">
+    UPDATE app_menu_config SET deleted_yn = 'N', visible_yn = 'N' WHERE menu_code = #{code} AND deleted_yn = 'Y'
+  </update>
+</mapper>

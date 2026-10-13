@@ -1,16 +1,26 @@
 {
-  "name": "purchase-request",
+  "name": "purchase-hr-playwright-tests",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "playwright test",
+    "test:e2e": "playwright test tests/e2e",
+    "test:login": "playwright test tests/e2e/login.spec.ts",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "report": "playwright show-report",
+    "api:build": "node tests/api/build-collections.js",
+    "test:purchase:ui": "node tests/run-playwright.js purchase tests/e2e/purchase.spec.ts",
+    "test:purchase:api": "node tests/run-newman.js purchase",
+    "test:hr:ui": "node tests/run-playwright.js hr tests/e2e/hr.spec.ts",
+    "test:hr:api": "node tests/run-newman.js hr",
+    "test:all": "node tests/run-all.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "devDependencies": {
-    "playwright": "^1.64.0"
+    "@playwright/test": "^1.56.0",
+    "@types/node": "^26.6.5",
+    "dotenv": "^17.2.3",
+    "newman": "^6.2.3",
+    "typescript": "^5.9.3"
   }
 }

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.demo.purchase.dao.ProductMapper">
+
+    <resultMap id="productMap"
+               type="com.demo.purchase.dao.ProductMapper$Product">
+        <constructor>
+            <idArg column="sku" javaType="string"/>
+            <arg column="name" javaType="string"/>
+            <arg column="unit_price" javaType="java.math.BigDecimal"/>
+            <arg column="active" javaType="_boolean"
+                 jdbcType="BOOLEAN"/>
+        </constructor>
+    </resultMap>
+
+    <select id="all" resultMap="productMap">
+        SELECT sku, name, unit_price, active
+        FROM test_products
+        ORDER BY sku
+        LIMIT 500
+    </select>
+
+    <select id="one" resultMap="productMap">
+        SELECT sku, name, unit_price, active
+        FROM test_products
+        WHERE sku = #{sku}
+    </select>
+
+    <insert id="add"
+            parameterType="com.demo.purchase.dao.ProductMapper$Product">
+        INSERT INTO test_products (sku, name, unit_price, active)
+        VALUES (#{sku}, #{name}, #{unitPrice}, #{active})
+    </insert>
+
+    <update id="edit"
+            parameterType="com.demo.purchase.dao.ProductMapper$Product">
+        UPDATE test_products
+        SET name = #{name},
+            unit_price = #{unitPrice},
+            active = #{active}
+        WHERE sku = #{sku}
+    </update>
+
+    <delete id="remove">
+        DELETE FROM test_products
+        WHERE sku = #{sku}
+    </delete>
+
+</mapper>

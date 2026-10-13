@@ -19,15 +19,13 @@ import com.demo.purchase.dao.vo.PurchaseRequest;
 import com.demo.purchase.service.PurchaseApprovalService;
 
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @RestController
 @RequestMapping("/api")
 public class PurchaseController {
     private final PurchaseRequestMapper mapper;
     private final PurchaseApprovalService approvalService;
-
+ 
     public PurchaseController(PurchaseRequestMapper mapper, PurchaseApprovalService approvalService) {
         this.mapper = mapper;
         this.approvalService = approvalService;
@@ -43,61 +41,25 @@ public class PurchaseController {
 
     @PostMapping("/purchase-requests")
     public ResponseEntity<PurchaseOutput> create(@Valid @RequestBody PurchaseInput input) {
-        // Do not log requester names, amounts, budgets or full request bodies.
-        String runId = input == null ? null : input.test_run_id();
-        if (runId == null || !runId.matches("[A-Za-z0-9_-]{1,64}")) {
-            log.warn("purchase.create.invalid_test_run_id");
+        if (input == null || input.test_run_id() == null || !input.test_run_id().matches("[A-Za-z0-9_-]{1,64}") || input.requester() == null || input.requester().isBlank() || input.requester().length()>100)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid test_run_id");
-        }
-        log.info("purchase.create.started testRunId={}", runId);
-        try {
-            var request = new PurchaseRequest();
-            request.setRequester(input.requester());
-            request.setTestRunId(runId);
-            request.setTotalAmount(input.amount());
-            request.setBudget(input.budget());
-            request.setStatus(approvalService.evaluate(input.amount(), input.budget()));
-            log.info("purchase.create.evaluated testRunId={} status={}", runId, request.getStatus());
-            if (mapper.insert(request) != 1 || request.getRequestId() == null) {
-                log.error("purchase.create.insert_failed testRunId={}", runId);
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Insert failed");
-            }
-            log.info("purchase.create.completed requestId={} testRunId={} status={}",
-                request.getRequestId(), runId, request.getStatus());
-            return ResponseEntity.status(HttpStatus.CREATED).body(toOutput(request));
-        } catch (ResponseStatusException ex) {
-            throw ex;
-        } catch (IllegalArgumentException ex) {
-            log.warn("purchase.create.invalid_input testRunId={} reason={}", runId, ex.getClass().getSimpleName());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid purchase input", ex);
-        } catch (RuntimeException ex) {
-            log.error("purchase.create.failed testRunId={} exceptionType={}", runId,
-                ex.getClass().getSimpleName(), ex);
-            throw ex;
-        }
+        var request = new PurchaseRequest();
+        request.setRequester(input.requester());
+        request.setTestRunId(input.test_run_id());
+        request.setTotalAmount(input.amount());
+        request.setBudget(input.budget());
+        request.setStatus(approvalService.evaluate(input.amount(), input.budget()));
+        if (mapper.insert(request) != 1 || request.getRequestId() == null)
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Insert failed");
+        return ResponseEntity.status(HttpStatus.CREATED).body(toOutput(request));
     }
 
     @GetMapping("/purchase-requests/{id}")
     public PurchaseOutput get(@PathVariable long id, @RequestParam("test_run_id") String runId) {
-        // Log only the database identifier; the correlation ID is validated on creation.
-        log.info("purchase.lookup.started requestId={}", id);
-        try {
-            var request = mapper.findByIdAndRunId(id, runId);
-            if (request == null) {
-                log.warn("purchase.lookup.not_found requestId={}", id);
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
-            }
-            log.info("purchase.lookup.completed requestId={} status={}", id, request.getStatus());
-            return toOutput(request);
-        } catch (ResponseStatusException ex) {
-            throw ex;
-        } catch (RuntimeException ex) {
-            log.error("purchase.lookup.failed requestId={} exceptionType={}", id,
-                ex.getClass().getSimpleName(), ex);
-            throw ex;
-        }
+        var request = mapper.findByIdAndRunId(id, runId);
+        if (request == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
+        return toOutput(request);
     }
-
 
     private static PurchaseOutput toOutput(PurchaseRequest r) {
         return new PurchaseOutput(r.getRequestId(), r.getRequester(), r.getTestRunId(),

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.purchase.dao.ModernizationProgressMapper">
+ <sql id="where">WHERE a.deleted_yn='N'
+  <if test="q != null and q != ''">AND (a.application_name LIKE CONCAT('%',#{q},'%') OR a.application_id LIKE CONCAT('%',#{q},'%'))</if>
+  <if test="status != null and status != ''">AND COALESCE(p.status,'NOT_STARTED') = #{status}</if>
+ </sql>
+ <select id="list" resultType="map">SELECT a.application_id AS applicationId, a.application_name AS applicationName,
+  a.owner_team AS ownerTeam, a.risk_level AS riskLevel, COALESCE(p.phase,'ANALYSIS') AS phase,
+  COALESCE(p.status,'NOT_STARTED') AS status, COALESCE(p.progress_percent,0) AS progressPercent,
+  p.owner_name AS ownerName, p.planned_end_date AS plannedEndDate, p.notes AS notes, p.updated_at AS updatedAt
+  FROM modernization_application a LEFT JOIN modernization_progress p ON p.application_id=a.application_id
+  <include refid="where"/> ORDER BY a.application_id LIMIT #{size} OFFSET #{offset}</select>
+ <select id="count" resultType="long">SELECT COUNT(*) FROM modernization_application a
+  LEFT JOIN modernization_progress p ON p.application_id=a.application_id <include refid="where"/></select>
+ <select id="find" resultType="map">SELECT application_id AS applicationId,phase,status,progress_percent AS progressPercent,
+  owner_name AS ownerName,planned_end_date AS plannedEndDate,notes,updated_by AS updatedBy,updated_at AS updatedAt
+  FROM modernization_progress WHERE application_id=#{id}</select>
+ <select id="applicationExists" resultType="int">SELECT COUNT(*) FROM modernization_application WHERE application_id=#{id} AND deleted_yn='N'</select>
+ <insert id="upsert" parameterType="map">INSERT INTO modernization_progress
+  (application_id,phase,status,progress_percent,owner_name,planned_end_date,notes,updated_by)
+  VALUES(#{applicationId},#{phase},#{status},#{progressPercent},#{ownerName},#{plannedEndDate},#{notes},#{updatedBy})
+  ON DUPLICATE KEY UPDATE phase=VALUES(phase),status=VALUES(status),progress_percent=VALUES(progress_percent),
+  owner_name=VALUES(owner_name),planned_end_date=VALUES(planned_end_date),notes=VALUES(notes),updated_by=VALUES(updated_by)</insert>
+ <insert id="history" parameterType="map">INSERT INTO modernization_progress_history
+  (application_id,old_phase,new_phase,old_status,new_status,old_percent,new_percent,changed_by)
+  VALUES(#{applicationId},#{oldPhase},#{phase},#{oldStatus},#{status},#{oldPercent},#{progressPercent},#{updatedBy})</insert>
+ <select id="historyList" resultType="map">SELECT history_id AS historyId,old_phase AS oldPhase,new_phase AS newPhase,
+  old_status AS oldStatus,new_status AS newStatus,old_percent AS oldPercent,new_percent AS newPercent,
+  changed_by AS changedBy,changed_at AS changedAt FROM modernization_progress_history
+  WHERE application_id=#{id} ORDER BY history_id DESC LIMIT 100</select>
+ <select id="summary" resultType="map">SELECT COUNT(*) AS total,
+  COALESCE(SUM(CASE WHEN p.status='COMPLETED' THEN 1 ELSE 0 END),0) AS completed,
+  COALESCE(SUM(CASE WHEN p.status='IN_PROGRESS' THEN 1 ELSE 0 END),0) AS inProgress,
+  COALESCE(SUM(CASE WHEN p.status='BLOCKED' THEN 1 ELSE 0 END),0) AS blocked,
+  COALESCE(ROUND(AVG(COALESCE(p.progress_percent,0)),1),0) AS averagePercent
+  FROM modernization_application a LEFT JOIN modernization_progress p ON p.application_id=a.application_id
+  WHERE a.deleted_yn='N'</select>
+</mapper>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.purchase.dao.ModernizationReportMapper">
+<select id="portfolio" resultType="map">SELECT COUNT(*) total, COALESCE(ROUND(AVG(COALESCE(p.progress_percent,0)),1),0) averageProgress,
+ COALESCE(SUM(CASE WHEN p.status='COMPLETED' THEN 1 ELSE 0 END),0) completed,
+ COALESCE(SUM(CASE WHEN p.status='BLOCKED' THEN 1 ELSE 0 END),0) blocked,
+ COALESCE(SUM(CASE WHEN p.status='IN_PROGRESS' THEN 1 ELSE 0 END),0) inProgress
+ FROM modernization_application a LEFT JOIN modernization_progress p ON a.application_id=p.application_id WHERE a.deleted_yn='N'</select>
+<select id="phases" resultType="map">SELECT COALESCE(p.phase,'ANALYSIS') name, COUNT(*) count FROM modernization_application a LEFT JOIN modernization_progress p ON a.application_id=p.application_id WHERE a.deleted_yn='N' GROUP BY COALESCE(p.phase,'ANALYSIS') ORDER BY FIELD(name,'ANALYSIS','PLANNING','TRANSFORMATION','TESTING','DEPLOYMENT')</select>
+<select id="statuses" resultType="map">SELECT COALESCE(p.status,'NOT_STARTED') name,COUNT(*) count FROM modernization_application a LEFT JOIN modernization_progress p ON a.application_id=p.application_id WHERE a.deleted_yn='N' GROUP BY COALESCE(p.status,'NOT_STARTED')</select>
+<select id="compatibility" resultType="map">SELECT compatibility_status name,COUNT(*) count FROM modernization_library WHERE deleted_yn='N' GROUP BY compatibility_status ORDER BY count DESC</select>
+<select id="types" resultType="map">SELECT library_type name,COUNT(*) count FROM modernization_library WHERE deleted_yn='N' GROUP BY library_type ORDER BY count DESC</select>
+<select id="risks" resultType="map">SELECT COALESCE(risk_level,'NOT_ASSESSED') name,COUNT(*) count FROM modernization_application WHERE deleted_yn='N' GROUP BY COALESCE(risk_level,'NOT_ASSESSED')</select>
+<select id="applications" resultType="map">SELECT a.application_id applicationId,a.application_name applicationName,a.owner_team ownerTeam,a.current_java currentJava,a.target_java targetJava,a.risk_level riskLevel,COALESCE(p.phase,'ANALYSIS') phase,COALESCE(p.status,'NOT_STARTED') status,COALESCE(p.progress_percent,0) progressPercent,p.planned_end_date plannedEndDate FROM modernization_application a LEFT JOIN modernization_progress p ON a.application_id=p.application_id WHERE a.deleted_yn='N' ORDER BY a.application_id</select>
+<select id="changes" resultType="map">SELECT DATE(changed_at) day,COUNT(*) changes FROM modernization_progress_history GROUP BY DATE(changed_at) ORDER BY day DESC LIMIT 30</select>
+</mapper>
